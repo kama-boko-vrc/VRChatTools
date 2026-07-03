@@ -17,7 +17,7 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Copy Armature Scale (A→B)` を開く
+1. メニューから `Tools > VRChatTools > Armature Scale Copier` を開く
 2. A（コピー元）とB（コピー先）にそれぞれのArmatureのTransformをドラッグ&ドロップ
 3. 「コピー実行」を押すと、ボーン名が一致する箇所を再帰的にたどりながら `localScale` と `MA Scale Adjuster` をコピー
    - Bに存在しないボーンはスキップされ、実行後にログで件数が表示されます
