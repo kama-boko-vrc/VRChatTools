@@ -35,3 +35,17 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 1. メニューから `Tools > VRChatTools > Scale Resetter` を開く
 2. 「対象」にリセットしたい階層のルートTransformをドラッグ&ドロップ
 3. 「スケールを1.0にリセット」を押すと、対象とその配下すべてのTransformの `localScale` が `(1,1,1)` にリセットされます
+
+## ArmatureComponentCleaner
+
+指定したTransformとその配下すべてから、Transform以外の全コンポーネントを再帰的に削除するエディタ拡張です。
+
+### 導入方法
+
+[ArmatureComponentCleaner/ArmatureComponentCleaner.cs](ArmatureComponentCleaner/ArmatureComponentCleaner.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > Armature Component Cleaner` を開く
+2. 「対象」に処理したい階層のルートTransformをドラッグ&ドロップ
+3. 「Transform以外を削除」を押すと、対象とその配下すべてのGameObjectからTransform以外のコンポーネントが再帰的に削除されます（Undo対応、Ctrl+Zで復元可）
