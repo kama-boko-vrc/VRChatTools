@@ -49,3 +49,19 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 1. メニューから `Tools > VRChatTools > Armature Component Cleaner` を開く
 2. 「対象」に処理したい階層のルートTransformをドラッグ&ドロップ
 3. 「Transform以外を削除」を押すと、対象とその配下すべてのGameObjectからTransform以外のコンポーネントが再帰的に削除されます（Undo対応、Ctrl+Zで復元可）
+
+## LilToonPropertyCopier
+
+1つのマテリアル（コピー元）から、選択したシェーダープロパティのみを複数のマテリアル（コピー先）へ一括コピーするエディタ拡張です。lilToonに限らず、コピー元・コピー先が同じシェーダーであれば利用できます。
+
+### 導入方法
+
+[LilToonPropertyCopier/LilToonPropertyCopier.cs](LilToonPropertyCopier/LilToonPropertyCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > LilToon Property Copier` を開く
+2. 「コピー元」にマテリアルを1つ設定
+3. 「+ コピー先を追加」でコピー先のマテリアルを複数登録
+4. コピー元のシェーダープロパティ一覧がチェックボックスで表示されるので、コピーしたい項目を選択（全選択/全解除ボタンあり）
+5. 「コピー実行」を押すと、選択したプロパティのみが全コピー先マテリアルへ一括反映されます（Undo対応）
