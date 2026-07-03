@@ -19,7 +19,8 @@ public class LilToonPropertyCopier : EditorWindow
     [MenuItem("Tools/VRChatTools/LilToon Property Copier")]
     private static void ShowWindow()
     {
-        GetWindow<LilToonPropertyCopier>("LilToon Property Copier");
+        LilToonPropertyCopier window = GetWindow<LilToonPropertyCopier>("LilToon Property Copier");
+        window.minSize = new Vector2(400, 500);
     }
 
     private void OnGUI()
@@ -57,22 +58,33 @@ public class LilToonPropertyCopier : EditorWindow
 
         if (sourceMaterial == null) return;
 
+        Shader shader = sourceMaterial.shader;
+        int propertyCount = shader.GetPropertyCount();
+
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("コピーするプロパティ", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField($"コピーするプロパティ（全{propertyCount}件）", EditorStyles.boldLabel);
 
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("全選択")) SetAllSelected(true);
         if (GUILayout.Button("全解除")) SetAllSelected(false);
         EditorGUILayout.EndHorizontal();
 
-        scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Height(250));
-        Shader shader = sourceMaterial.shader;
-        for (int i = 0; i < shader.GetPropertyCount(); i++)
+        scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.ExpandHeight(true));
+        for (int i = 0; i < propertyCount; i++)
         {
             string propName = shader.GetPropertyName(i);
+            string description;
+            try
+            {
+                description = shader.GetPropertyDescription(i);
+            }
+            catch
+            {
+                description = propName;
+            }
+
             bool current = selectedProperties.TryGetValue(propName, out bool v) && v;
-            selectedProperties[propName] = EditorGUILayout.ToggleLeft(
-                $"{shader.GetPropertyDescription(i)} ({propName})", current);
+            selectedProperties[propName] = EditorGUILayout.ToggleLeft($"{description} ({propName})", current);
         }
         EditorGUILayout.EndScrollView();
 
