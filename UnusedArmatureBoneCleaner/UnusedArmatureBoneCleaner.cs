@@ -100,7 +100,6 @@ public class UnusedArmatureBoneCleaner : EditorWindow
 
         HashSet<Transform> referenced = new HashSet<Transform>();
         CollectReferencedTransforms(avatarRoot, referenced);
-        MarkEndBonesAsReferenced(armatureRoot, referenced);
 
         Dictionary<Transform, bool> unusedCache = new Dictionary<Transform, bool>();
         foreach (Transform child in armatureRoot)
@@ -168,14 +167,6 @@ public class UnusedArmatureBoneCleaner : EditorWindow
         }
     }
 
-    private static void MarkEndBonesAsReferenced(Transform armatureRoot, HashSet<Transform> referenced)
-    {
-        foreach (Transform t in armatureRoot.GetComponentsInChildren<Transform>(true))
-        {
-            if (IsEndBoneName(t.name)) referenced.Add(t);
-        }
-    }
-
     private static bool IsEndBoneName(string name)
     {
         return name.TrimEnd().EndsWith("end", StringComparison.OrdinalIgnoreCase);
@@ -205,7 +196,10 @@ public class UnusedArmatureBoneCleaner : EditorWindow
     private static void CollectTopLevelUnusedRoots(Transform t, HashSet<Transform> referenced,
         Dictionary<Transform, bool> cache, List<Transform> result)
     {
-        if (IsFullyUnused(t, referenced, cache))
+        // 単体で見つかったendボーンは削除候補にしない（例: 現役の指チェーン末端のendボーンを誤検出しないため）。
+        // ただし、その祖先チェーンごと未参照であれば、祖先側がここより先に候補として追加されるため
+        // endボーンごと削除対象に含まれる。
+        if (IsFullyUnused(t, referenced, cache) && !IsEndBoneName(t.name))
         {
             result.Add(t);
             return;
