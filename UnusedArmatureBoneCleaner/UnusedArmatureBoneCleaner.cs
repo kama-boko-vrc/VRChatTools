@@ -37,8 +37,10 @@ public class UnusedArmatureBoneCleaner : EditorWindow
             MessageType.Warning);
 
         EditorGUI.BeginChangeCheck();
-        avatarRoot = (Transform)EditorGUILayout.ObjectField("アバタールート（参照スキャン範囲）", avatarRoot, typeof(Transform), true);
-        armatureRoot = (Transform)EditorGUILayout.ObjectField("Armatureルート（削除候補の範囲）", armatureRoot, typeof(Transform), true);
+        EditorGUILayout.LabelField("アバタールート（参照スキャン範囲）");
+        avatarRoot = (Transform)EditorGUILayout.ObjectField(avatarRoot, typeof(Transform), true);
+        EditorGUILayout.LabelField("Armatureルート（削除候補の範囲）");
+        armatureRoot = (Transform)EditorGUILayout.ObjectField(armatureRoot, typeof(Transform), true);
         if (EditorGUI.EndChangeCheck())
         {
             ClearResults();
