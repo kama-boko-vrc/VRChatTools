@@ -100,6 +100,7 @@ public class UnusedArmatureBoneCleaner : EditorWindow
 
         HashSet<Transform> referenced = new HashSet<Transform>();
         CollectReferencedTransforms(avatarRoot, referenced);
+        MarkEndBonesAsReferenced(armatureRoot, referenced);
 
         Dictionary<Transform, bool> unusedCache = new Dictionary<Transform, bool>();
         foreach (Transform child in armatureRoot)
@@ -165,6 +166,19 @@ public class UnusedArmatureBoneCleaner : EditorWindow
                 }
             }
         }
+    }
+
+    private static void MarkEndBonesAsReferenced(Transform armatureRoot, HashSet<Transform> referenced)
+    {
+        foreach (Transform t in armatureRoot.GetComponentsInChildren<Transform>(true))
+        {
+            if (IsEndBoneName(t.name)) referenced.Add(t);
+        }
+    }
+
+    private static bool IsEndBoneName(string name)
+    {
+        return name.TrimEnd().EndsWith("end", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsFullyUnused(Transform t, HashSet<Transform> referenced, Dictionary<Transform, bool> cache)

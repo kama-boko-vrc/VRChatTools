@@ -76,6 +76,8 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 - HumanoidのAnimatorが `GetBoneTransform` で参照するボーン
 - アバター配下の全コンポーネントが持つTransform/GameObject参照（PhysBoneやConstraintなど任意のコンポーネントに対応）
 
+名前が「end」で終わるボーン（例: `Hand_End`）は、他から参照されていなくても常に使用中とみなして削除候補から除外されます（そのボーンに至る親チェーンも保護されます）。
+
 ### 導入方法
 
 [UnusedArmatureBoneCleaner/UnusedArmatureBoneCleaner.cs](UnusedArmatureBoneCleaner/UnusedArmatureBoneCleaner.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
