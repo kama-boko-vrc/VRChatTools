@@ -5,10 +5,10 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 指定したArmature配下のボーンのうち、アバター内のどこからも参照されていないものを検出し、
+/// 指定したArmature配下のボーンのうち、SkinnedMeshRendererから参照されていないものを検出し、
 /// チェックリスト形式で選択した上で一括削除するエディタ拡張。
-/// 参照の判定対象: SkinnedMeshRenderer(rootBone/bones)、HumanoidのAnimator(GetBoneTransform)、
-/// アバター配下の全コンポーネントのシリアライズ済みTransform/GameObject参照。
+/// PhysBoneなど他のコンポーネントからの参照は判定に含めない（SkinnedMeshRendererの
+/// rootBone/bonesにあるかどうかのみを基準にする）。
 /// </summary>
 public class UnusedArmatureBoneCleaner : EditorWindow
 {
@@ -30,9 +30,9 @@ public class UnusedArmatureBoneCleaner : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.HelpBox(
-            "指定したArmature配下で、アバターのどこからも参照されていないボーンを検出します。\n" +
-            "検出対象: SkinnedMeshRendererのボーン、HumanoidのAnimatorが参照するボーン、\n" +
-            "全コンポーネントのTransform/GameObject参照。\n" +
+            "指定したArmature配下で、SkinnedMeshRendererから参照されていないボーンを検出します。\n" +
+            "PhysBoneなど他のコンポーネントからの参照は判定に含みません。そのボーンが\n" +
+            "PhysBone等で使われている場合は、削除前に該当コンポーネントも確認してください。\n" +
             "削除はUndo対応（Ctrl+Zで復元可）ですが、実行前に一覧を確認してください。",
             MessageType.Warning);
 
@@ -118,57 +118,14 @@ public class UnusedArmatureBoneCleaner : EditorWindow
 
     private static void CollectReferencedTransforms(Transform avatar, HashSet<Transform> referenced)
     {
-        foreach (Transform t in avatar.GetComponentsInChildren<Transform>(true))
+        foreach (SkinnedMeshRenderer smr in avatar.GetComponentsInChildren<SkinnedMeshRenderer>(true))
         {
-            Component[] components = t.GetComponents<Component>();
+            if (smr.rootBone != null) referenced.Add(smr.rootBone);
+            if (smr.bones == null) continue;
 
-            // Transform以外のコンポーネントが乗っている場合は、そのボーン自身が使用中とみなす。
-            // 例: VRC Phys Boneの Root Transform を空欄のまま自分自身に適用しているケースを拾うため。
-            if (components.Length > 1) referenced.Add(t);
-
-            foreach (Component comp in components)
+            foreach (Transform b in smr.bones)
             {
-                if (comp == null || comp is Transform) continue;
-
-                if (comp is SkinnedMeshRenderer smr)
-                {
-                    if (smr.rootBone != null) referenced.Add(smr.rootBone);
-                    if (smr.bones != null)
-                    {
-                        foreach (Transform b in smr.bones)
-                        {
-                            if (b != null) referenced.Add(b);
-                        }
-                    }
-                }
-
-                if (comp is Animator animator && animator.isHuman)
-                {
-                    foreach (HumanBodyBones hb in Enum.GetValues(typeof(HumanBodyBones)))
-                    {
-                        if (hb == HumanBodyBones.LastBone) continue;
-                        Transform bone = animator.GetBoneTransform(hb);
-                        if (bone != null) referenced.Add(bone);
-                    }
-                }
-
-                SerializedObject so = new SerializedObject(comp);
-                SerializedProperty prop = so.GetIterator();
-                bool enterChildren = true;
-                while (prop.NextVisible(enterChildren))
-                {
-                    enterChildren = true;
-                    if (prop.propertyType != SerializedPropertyType.ObjectReference) continue;
-
-                    UnityEngine.Object obj = prop.objectReferenceValue;
-                    if (obj == null) continue;
-
-                    Transform refTransform = obj as Transform;
-                    if (refTransform == null && obj is GameObject go) refTransform = go.transform;
-                    if (refTransform == null && obj is Component c) refTransform = c.transform;
-
-                    if (refTransform != null) referenced.Add(refTransform);
-                }
+                if (b != null) referenced.Add(b);
             }
         }
     }
