@@ -75,6 +75,7 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 - SkinnedMeshRendererの `rootBone` / `bones`
 - HumanoidのAnimatorが `GetBoneTransform` で参照するボーン
 - アバター配下の全コンポーネントが持つTransform/GameObject参照（PhysBoneやConstraintなど任意のコンポーネントに対応）
+- ボーン自身にTransform以外のコンポーネントが付いている場合（例: Root Transformを空欄にして自分自身に適用するVRC Phys Boneなど）
 
 名前が「end」で終わるボーン（例: `Hand_End`）は単体では削除候補になりません（現役のボーンチェーンの末端にある未参照のendボーンを誤検出しないため）。ただし、そのボーンに至る親チェーンごと未参照であれば、endボーンを含めてチェーンごと削除候補になります。
 

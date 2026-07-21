@@ -120,7 +120,13 @@ public class UnusedArmatureBoneCleaner : EditorWindow
     {
         foreach (Transform t in avatar.GetComponentsInChildren<Transform>(true))
         {
-            foreach (Component comp in t.GetComponents<Component>())
+            Component[] components = t.GetComponents<Component>();
+
+            // Transform以外のコンポーネントが乗っている場合は、そのボーン自身が使用中とみなす。
+            // 例: VRC Phys Boneの Root Transform を空欄のまま自分自身に適用しているケースを拾うため。
+            if (components.Length > 1) referenced.Add(t);
+
+            foreach (Component comp in components)
             {
                 if (comp == null || comp is Transform) continue;
 
