@@ -68,7 +68,12 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ## FXLayerOrganizer
 
-Animator Controller（FX Layerなど）のレイヤー・パラメータを一覧表示し、どのState/Transition/BlendTreeからも参照されていないパラメータを検出してチェックリストから選択の上で一括削除するエディタ拡張です。レイヤー自体は一覧表示のみで削除は行いません。
+アバターのルートを指定するだけで、そのアバターが使っている全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）を自動収集し、レイヤー・パラメータを一覧表示するエディタ拡張です。どのState/Transition/BlendTreeからも参照されていないパラメータはControllerごとにチェックリストから選択の上で一括削除できます。レイヤー自体は一覧表示のみで削除は行いません。
+
+Animator Controllerの収集元:
+
+- VRCAvatarDescriptorの `baseAnimationLayers`（Base/Additive/Gesture/Action/FX）/ `specialAnimationLayers`（Sit/TPose/IKPose）（SerializedObject経由で読むためVRCSDK未導入でもコンパイル可能）
+- 配下のAnimatorコンポーネントが参照しているController
 
 未使用の判定対象:
 
@@ -83,6 +88,6 @@ Animator Controller（FX Layerなど）のレイヤー・パラメータを一�
 ### 使い方
 
 1. メニューから `Tools > VRChatTools > FX Layer Organizer` を開く
-2. 「Animator Controller」にFX LayerなどのControllerを設定
-3. 「スキャン」を押すと、レイヤー一覧とパラメータ一覧が表示されます。未使用パラメータはチェックリスト形式で表示されます（デフォルト全解除、全選択/全解除ボタンあり）
-4. 「選択した未使用パラメータを削除」で選択したパラメータのみ一括削除されます（Undo対応）
+2. 「アバタールート」にアバターのルートを設定
+3. 「スキャン」を押すと、見つかった全Animator Controllerについてレイヤー一覧とパラメータ一覧が表示されます。未使用パラメータはController単位のチェックリスト形式で表示されます（デフォルト全解除、Controllerごとに全選択/全解除ボタンあり）
+4. 「選択した未使用パラメータを削除（全Controller対象）」で、全Controllerを横断して選択したパラメータのみ一括削除されます（Undo対応）

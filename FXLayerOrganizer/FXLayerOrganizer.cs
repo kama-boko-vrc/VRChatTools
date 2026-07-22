@@ -5,17 +5,24 @@ using UnityEditor.Animations;
 using UnityEngine;
 
 /// <summary>
-/// Animator Controller（FX Layerなど）のレイヤー・パラメータを一覧表示し、
-/// どのState/Transition/BlendTreeからも参照されていないパラメータを検出して
-/// チェックリストから選択の上で一括削除するエディタ拡張。
-/// レイヤー自体は一覧表示のみで削除は行わない。
+/// アバターを指定すると、そのアバターが使う全Animator Controller
+/// （VRCAvatarDescriptorの各Playable Layer、および配下のAnimatorコンポーネント）を自動収集し、
+/// レイヤー・パラメータを一覧表示するエディタ拡張。
+/// どのState/Transition/BlendTreeからも参照されていないパラメータはチェックリストから選択の上で
+/// 一括削除できる（レイヤー自体は一覧表示のみで削除しない）。
+/// VRCSDKへの直接参照は持たせず、SerializedObject経由でVRCAvatarDescriptorのフィールドを読む。
 /// </summary>
 public class FXLayerOrganizer : EditorWindow
 {
-    private AnimatorController controller;
+    private class ControllerInfo
+    {
+        public AnimatorController controller;
+        public readonly HashSet<string> unusedParameterNames = new HashSet<string>();
+        public readonly Dictionary<string, bool> selected = new Dictionary<string, bool>();
+    }
 
-    private readonly HashSet<string> unusedParameterNames = new HashSet<string>();
-    private readonly Dictionary<string, bool> selected = new Dictionary<string, bool>();
+    private Transform avatarRoot;
+    private readonly List<ControllerInfo> scannedControllers = new List<ControllerInfo>();
     private Vector2 scroll;
     private bool hasScanned;
 
@@ -29,101 +36,163 @@ public class FXLayerOrganizer : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.HelpBox(
-            "Animator Controller（FX Layerなど）のレイヤー・パラメータを一覧表示します。\n" +
-            "どのState/Transition/BlendTreeからも参照されていないパラメータは削除候補として\n" +
-            "チェックリストに表示されます（レイヤー自体は削除されません）。",
+            "アバターを指定すると、使用している全Animator Controller\n" +
+            "（VRCAvatarDescriptorの各Playable Layer、配下のAnimator）を自動収集し、\n" +
+            "レイヤー・パラメータを一覧表示します。どのState/Transition/BlendTreeからも\n" +
+            "参照されていないパラメータは削除候補としてチェックリストに表示されます\n" +
+            "（レイヤー自体は削除されません）。",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.LabelField("Animator Controller");
-        controller = (AnimatorController)EditorGUILayout.ObjectField(controller, typeof(AnimatorController), false);
+        EditorGUILayout.LabelField("アバタールート");
+        avatarRoot = (Transform)EditorGUILayout.ObjectField(avatarRoot, typeof(Transform), true);
         if (EditorGUI.EndChangeCheck())
         {
             ClearResults();
         }
 
-        EditorGUI.BeginDisabledGroup(controller == null);
+        EditorGUI.BeginDisabledGroup(avatarRoot == null);
         if (GUILayout.Button("スキャン"))
         {
             Scan();
         }
         EditorGUI.EndDisabledGroup();
 
-        if (!hasScanned || controller == null) return;
+        if (!hasScanned) return;
 
         EditorGUILayout.Space();
+
+        if (scannedControllers.Count == 0)
+        {
+            EditorGUILayout.HelpBox("Animator Controllerが見つかりませんでした。", MessageType.Warning);
+            return;
+        }
 
         scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.ExpandHeight(true));
 
-        EditorGUILayout.LabelField($"レイヤー（{controller.layers.Length}件）", EditorStyles.boldLabel);
-        foreach (AnimatorControllerLayer layer in controller.layers)
+        foreach (ControllerInfo info in scannedControllers)
         {
-            int stateCount = layer.stateMachine != null ? layer.stateMachine.states.Length : 0;
-            EditorGUILayout.LabelField($"・{layer.name}（State数: {stateCount}, Weight: {layer.defaultWeight}）");
-        }
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField(
-            $"パラメータ（全{controller.parameters.Length}件 / 未使用{unusedParameterNames.Count}件）",
-            EditorStyles.boldLabel);
-
-        foreach (AnimatorControllerParameter p in controller.parameters)
-        {
-            if (unusedParameterNames.Contains(p.name))
-            {
-                bool current = selected.TryGetValue(p.name, out bool v) && v;
-                selected[p.name] = EditorGUILayout.ToggleLeft($"{p.name} ({p.type}) - 未使用", current);
-            }
-            else
-            {
-                EditorGUILayout.LabelField($"　{p.name} ({p.type})");
-            }
+            DrawController(info);
+            EditorGUILayout.Space();
         }
 
         EditorGUILayout.EndScrollView();
 
-        if (unusedParameterNames.Count == 0) return;
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("全選択")) SetAllSelected(true);
-        if (GUILayout.Button("全解除")) SetAllSelected(false);
-        EditorGUILayout.EndHorizontal();
-
-        if (GUILayout.Button("選択した未使用パラメータを削除"))
+        if (GUILayout.Button("選択した未使用パラメータを削除（全Controller対象）"))
         {
             DeleteSelected();
         }
     }
 
+    private void DrawController(ControllerInfo info)
+    {
+        AnimatorController controller = info.controller;
+
+        EditorGUILayout.LabelField(controller.name, EditorStyles.boldLabel);
+
+        EditorGUILayout.LabelField($"レイヤー（{controller.layers.Length}件）");
+        foreach (AnimatorControllerLayer layer in controller.layers)
+        {
+            int stateCount = layer.stateMachine != null ? layer.stateMachine.states.Length : 0;
+            EditorGUILayout.LabelField($"　・{layer.name}（State数: {stateCount}, Weight: {layer.defaultWeight}）");
+        }
+
+        EditorGUILayout.LabelField(
+            $"パラメータ（全{controller.parameters.Length}件 / 未使用{info.unusedParameterNames.Count}件）");
+
+        foreach (AnimatorControllerParameter p in controller.parameters)
+        {
+            if (info.unusedParameterNames.Contains(p.name))
+            {
+                bool current = info.selected.TryGetValue(p.name, out bool v) && v;
+                info.selected[p.name] = EditorGUILayout.ToggleLeft($"　{p.name} ({p.type}) - 未使用", current);
+            }
+            else
+            {
+                EditorGUILayout.LabelField($"　　{p.name} ({p.type})");
+            }
+        }
+
+        if (info.unusedParameterNames.Count == 0) return;
+
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("全選択", GUILayout.Width(80))) SetAllSelected(info, true);
+        if (GUILayout.Button("全解除", GUILayout.Width(80))) SetAllSelected(info, false);
+        EditorGUILayout.EndHorizontal();
+    }
+
     private void ClearResults()
     {
-        unusedParameterNames.Clear();
-        selected.Clear();
+        scannedControllers.Clear();
         hasScanned = false;
     }
 
     private void Scan()
     {
-        unusedParameterNames.Clear();
-        selected.Clear();
+        scannedControllers.Clear();
 
-        HashSet<string> used = new HashSet<string>();
-        foreach (AnimatorControllerLayer layer in controller.layers)
-        {
-            if (layer.stateMachine != null) CollectUsedParameters(layer.stateMachine, used);
-        }
+        HashSet<AnimatorController> controllers = new HashSet<AnimatorController>();
+        CollectControllersFromAvatarDescriptor(avatarRoot.gameObject, controllers);
+        CollectControllersFromAnimators(avatarRoot.gameObject, controllers);
 
-        foreach (AnimatorControllerParameter p in controller.parameters)
+        foreach (AnimatorController controller in controllers)
         {
-            if (!used.Contains(p.name))
+            ControllerInfo info = new ControllerInfo { controller = controller };
+
+            HashSet<string> used = new HashSet<string>();
+            foreach (AnimatorControllerLayer layer in controller.layers)
             {
-                unusedParameterNames.Add(p.name);
-                selected[p.name] = false;
+                if (layer.stateMachine != null) CollectUsedParameters(layer.stateMachine, used);
             }
+
+            foreach (AnimatorControllerParameter p in controller.parameters)
+            {
+                if (!used.Contains(p.name))
+                {
+                    info.unusedParameterNames.Add(p.name);
+                    info.selected[p.name] = false;
+                }
+            }
+
+            scannedControllers.Add(info);
         }
 
         hasScanned = true;
-        Debug.Log($"[FXLayerOrganizer] スキャン完了: パラメータ{controller.parameters.Length}件中、未使用{unusedParameterNames.Count}件");
+        Debug.Log($"[FXLayerOrganizer] スキャン完了: Animator Controller {scannedControllers.Count}件");
+    }
+
+    private static void CollectControllersFromAvatarDescriptor(GameObject avatar, HashSet<AnimatorController> controllers)
+    {
+        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
+        {
+            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
+
+            SerializedObject so = new SerializedObject(comp);
+            CollectFromLayerArray(so.FindProperty("baseAnimationLayers"), controllers);
+            CollectFromLayerArray(so.FindProperty("specialAnimationLayers"), controllers);
+        }
+    }
+
+    private static void CollectFromLayerArray(SerializedProperty arrayProp, HashSet<AnimatorController> controllers)
+    {
+        if (arrayProp == null || !arrayProp.isArray) return;
+
+        for (int i = 0; i < arrayProp.arraySize; i++)
+        {
+            SerializedProperty element = arrayProp.GetArrayElementAtIndex(i);
+            SerializedProperty controllerProp = element.FindPropertyRelative("animatorController");
+            if (controllerProp == null) continue;
+
+            if (controllerProp.objectReferenceValue is AnimatorController ac) controllers.Add(ac);
+        }
+    }
+
+    private static void CollectControllersFromAnimators(GameObject avatar, HashSet<AnimatorController> controllers)
+    {
+        foreach (Animator animator in avatar.GetComponentsInChildren<Animator>(true))
+        {
+            if (animator.runtimeAnimatorController is AnimatorController ac) controllers.Add(ac);
+        }
     }
 
     private static void CollectUsedParameters(AnimatorStateMachine sm, HashSet<string> used)
@@ -178,38 +247,47 @@ public class FXLayerOrganizer : EditorWindow
         }
     }
 
-    private void SetAllSelected(bool value)
+    private static void SetAllSelected(ControllerInfo info, bool value)
     {
-        foreach (string name in unusedParameterNames)
+        foreach (string name in info.unusedParameterNames)
         {
-            selected[name] = value;
+            info.selected[name] = value;
         }
     }
 
     private void DeleteSelected()
     {
-        List<AnimatorControllerParameter> toDelete = new List<AnimatorControllerParameter>();
-        foreach (AnimatorControllerParameter p in controller.parameters)
+        int deletedCount = 0;
+
+        foreach (ControllerInfo info in scannedControllers)
         {
-            if (unusedParameterNames.Contains(p.name) && selected.TryGetValue(p.name, out bool v) && v)
+            AnimatorController controller = info.controller;
+
+            List<AnimatorControllerParameter> toDelete = new List<AnimatorControllerParameter>();
+            foreach (AnimatorControllerParameter p in controller.parameters)
             {
-                toDelete.Add(p);
+                if (info.unusedParameterNames.Contains(p.name) &&
+                    info.selected.TryGetValue(p.name, out bool v) && v)
+                {
+                    toDelete.Add(p);
+                }
             }
+
+            if (toDelete.Count == 0) continue;
+
+            Undo.RecordObject(controller, "Delete Unused Parameters");
+
+            foreach (AnimatorControllerParameter p in toDelete)
+            {
+                controller.RemoveParameter(p);
+                info.unusedParameterNames.Remove(p.name);
+            }
+
+            EditorUtility.SetDirty(controller);
+            deletedCount += toDelete.Count;
         }
 
-        if (toDelete.Count == 0) return;
-
-        Undo.RecordObject(controller, "Delete Unused Parameters");
-
-        foreach (AnimatorControllerParameter p in toDelete)
-        {
-            controller.RemoveParameter(p);
-            unusedParameterNames.Remove(p.name);
-        }
-
-        EditorUtility.SetDirty(controller);
-
-        Debug.Log($"[FXLayerOrganizer] 完了: {toDelete.Count}件のパラメータを削除しました");
+        Debug.Log($"[FXLayerOrganizer] 完了: {deletedCount}件のパラメータを削除しました");
     }
 }
 #endif
