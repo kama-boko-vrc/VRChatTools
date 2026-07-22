@@ -68,18 +68,17 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ## FXLayerOrganizer
 
-アバターのルートを指定するだけで、そのアバターが使っている全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）を自動収集し、レイヤー・パラメータを一覧表示するエディタ拡張です。どのState/Transition/BlendTreeからも参照されていないパラメータはControllerごとにチェックリストから選択の上で一括削除できます。レイヤー自体は一覧表示のみで削除は行いません。
+アバターのルートを指定するだけで、そのアバターが使っている全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）を自動収集し、レイヤー・パラメータを一覧表示するエディタ拡張です。全レイヤー・全パラメータにチェックボックスがあり、選択したものをControllerを横断して一括削除できます。
 
 Animator Controllerの収集元:
 
 - VRCAvatarDescriptorの `baseAnimationLayers`（Base/Additive/Gesture/Action/FX）/ `specialAnimationLayers`（Sit/TPose/IKPose）（SerializedObject経由で読むためVRCSDK未導入でもコンパイル可能）
 - 配下のAnimatorコンポーネントが参照しているController
 
-未使用の判定対象:
+「未使用」表示の判定対象（あくまで目安表示で、チェックの有効/無効には影響しません）:
 
-- 通常のTransition / Any State Transition / Entry Transitionの条件（parameter）
-- StateのMotion Time / Speed / Cycle Offset / Mirrorパラメータ
-- BlendTree（Direct含む）のBlend Parameter
+- パラメータ: 通常のTransition / Any State Transition / Entry Transitionの条件（parameter）、StateのMotion Time / Speed / Cycle Offset / Mirrorパラメータ、BlendTree（Direct含む）のBlend Parameterのいずれからも参照されていないもの
+- レイヤー: Stateを1つも持たないもの
 
 ### 導入方法
 
@@ -89,5 +88,5 @@ Animator Controllerの収集元:
 
 1. メニューから `Tools > VRChatTools > FX Layer Organizer` を開く
 2. 「アバタールート」にアバターのルートを設定
-3. 「スキャン」を押すと、見つかった全Animator Controllerについてレイヤー一覧とパラメータ一覧が表示されます。未使用パラメータはController単位のチェックリスト形式で表示されます（デフォルト全解除、Controllerごとに全選択/全解除ボタンあり）
-4. 「選択した未使用パラメータを削除（全Controller対象）」で、全Controllerを横断して選択したパラメータのみ一括削除されます（Undo対応）
+3. 「スキャン」を押すと、見つかった全Animator Controllerについてレイヤー一覧とパラメータ一覧がチェックリスト形式で表示されます（デフォルト全解除、レイヤー/パラメータそれぞれに全選択/全解除ボタンあり）
+4. 「選択したレイヤー・パラメータを削除（全Controller対象）」で、全Controllerを横断して選択した項目のみ一括削除されます（Undo対応）
