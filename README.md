@@ -65,3 +65,24 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 3. 「+ コピー先を追加」でコピー先のマテリアルを複数登録
 4. コピー元のシェーダープロパティ一覧がチェックボックスで表示されるので、コピーしたい項目を選択（全選択/全解除ボタンあり）
 5. 「コピー実行」を押すと、選択したプロパティのみが全コピー先マテリアルへ一括反映されます（Undo対応）
+
+## FXLayerOrganizer
+
+Animator Controller（FX Layerなど）のレイヤー・パラメータを一覧表示し、どのState/Transition/BlendTreeからも参照されていないパラメータを検出してチェックリストから選択の上で一括削除するエディタ拡張です。レイヤー自体は一覧表示のみで削除は行いません。
+
+未使用の判定対象:
+
+- 通常のTransition / Any State Transition / Entry Transitionの条件（parameter）
+- StateのMotion Time / Speed / Cycle Offset / Mirrorパラメータ
+- BlendTree（Direct含む）のBlend Parameter
+
+### 導入方法
+
+[FXLayerOrganizer/FXLayerOrganizer.cs](FXLayerOrganizer/FXLayerOrganizer.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > FX Layer Organizer` を開く
+2. 「Animator Controller」にFX LayerなどのControllerを設定
+3. 「スキャン」を押すと、レイヤー一覧とパラメータ一覧が表示されます。未使用パラメータはチェックリスト形式で表示されます（デフォルト全解除、全選択/全解除ボタンあり）
+4. 「選択した未使用パラメータを削除」で選択したパラメータのみ一括削除されます（Undo対応）
