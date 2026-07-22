@@ -287,6 +287,8 @@ public class RadialMenuOrganizer : EditorWindow
             indicesToDelete.Sort();
             indicesToDelete.Reverse(); // 降順に削除してインデックスのズレを防ぐ
 
+            Undo.RecordObject(node.menuAsset, "Delete Menu Controls");
+
             SerializedObject so = new SerializedObject(node.menuAsset);
             SerializedProperty controlsProp = so.FindProperty("controls");
 
@@ -296,7 +298,7 @@ public class RadialMenuOrganizer : EditorWindow
                 deletedCount++;
             }
 
-            so.ApplyModifiedPropertiesWithUndo("Delete Menu Controls");
+            so.ApplyModifiedProperties();
             EditorUtility.SetDirty(node.menuAsset);
         }
 
