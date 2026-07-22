@@ -65,3 +65,18 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 3. 「+ コピー先を追加」でコピー先のマテリアルを複数登録
 4. コピー元のシェーダープロパティ一覧がチェックボックスで表示されるので、コピーしたい項目を選択（全選択/全解除ボタンあり）
 5. 「コピー実行」を押すと、選択したプロパティのみが全コピー先マテリアルへ一括反映されます（Undo対応）
+
+## WriteDefaultsBatchSetter
+
+アバターのルートを指定するだけで、使用している全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）の全State（サブステートマシン含む）についてWrite Defaultsの現在値を集計し、一括でON/OFFに変更するエディタ拡張です。ON/OFFが混在している場合は警告表示されます。
+
+### 導入方法
+
+[WriteDefaultsBatchSetter/WriteDefaultsBatchSetter.cs](WriteDefaultsBatchSetter/WriteDefaultsBatchSetter.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > Write Defaults Batch Setter` を開く
+2. 「アバタールート」にアバターのルートを設定
+3. 「スキャン」を押すと、Controllerごと・合計のState数とON/OFF件数が表示されます
+4. 「全StateをONにする」/「全StateをOFFにする」で、全Controllerの全Stateに一括反映されます（Undo対応）
