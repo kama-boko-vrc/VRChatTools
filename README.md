@@ -77,7 +77,7 @@ Animator Controllerの収集元:
 
 「未使用」表示の判定対象（あくまで目安表示で、チェックの有効/無効には影響しません）:
 
-- パラメータ: 通常のTransition / Any State Transition / Entry Transitionの条件（parameter）、StateのMotion Time / Speed / Cycle Offset / Mirrorパラメータ、BlendTree（Direct含む）のBlend Parameterのいずれからも参照されていないもの
+- パラメータ: 通常のTransition / Any State Transition / Entry Transitionの条件（parameter）、StateのMotion Time / Speed / Cycle Offset / Mirrorパラメータ、BlendTree（Direct含む）のBlend Parameter、Expressions Menu（ラジアルメニュー、サブメニュー含む）のparameter/subParametersのいずれからも参照されていないもの
 - レイヤー: Stateを1つも持たないもの
 
 ### 導入方法

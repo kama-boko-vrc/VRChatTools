@@ -9,8 +9,9 @@ using UnityEngine;
 /// （VRCAvatarDescriptorの各Playable Layer、および配下のAnimatorコンポーネント）を自動収集し、
 /// レイヤー・パラメータを一覧表示するエディタ拡張。
 /// 全レイヤー・全パラメータにチェックボックスがあり、選択したものを一括削除できる。
-/// どのState/Transition/BlendTreeからも参照されていないパラメータ、Stateを持たないレイヤーは
-/// 「未使用」として表示されるが、あくまで目安でありチェックの有効/無効には影響しない。
+/// どのState/Transition/BlendTree/Expressions Menu（ラジアルメニュー、サブメニュー含む）からも
+/// 参照されていないパラメータ、Stateを持たないレイヤーは「未使用」として表示されるが、
+/// あくまで目安でありチェックの有効/無効には影響しない。
 /// VRCSDKへの直接参照は持たせず、SerializedObject経由でVRCAvatarDescriptorのフィールドを読む。
 /// </summary>
 public class FXLayerOrganizer : EditorWindow
@@ -141,11 +142,14 @@ public class FXLayerOrganizer : EditorWindow
         CollectControllersFromAvatarDescriptor(avatarRoot.gameObject, controllers);
         CollectControllersFromAnimators(avatarRoot.gameObject, controllers);
 
+        HashSet<string> usedByExpressionsMenu = new HashSet<string>();
+        CollectUsedParametersFromExpressionsMenu(avatarRoot.gameObject, usedByExpressionsMenu);
+
         foreach (AnimatorController controller in controllers)
         {
             ControllerInfo info = new ControllerInfo { controller = controller };
 
-            HashSet<string> used = new HashSet<string>();
+            HashSet<string> used = new HashSet<string>(usedByExpressionsMenu);
             foreach (AnimatorControllerLayer layer in controller.layers)
             {
                 if (layer.stateMachine != null) CollectUsedParameters(layer.stateMachine, used);
@@ -194,6 +198,55 @@ public class FXLayerOrganizer : EditorWindow
             if (controllerProp == null) continue;
 
             if (controllerProp.objectReferenceValue is AnimatorController ac) controllers.Add(ac);
+        }
+    }
+
+    private static void CollectUsedParametersFromExpressionsMenu(GameObject avatar, HashSet<string> used)
+    {
+        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
+        {
+            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
+
+            SerializedObject so = new SerializedObject(comp);
+            SerializedProperty menuProp = so.FindProperty("expressionsMenu");
+            if (menuProp == null) continue;
+
+            UnityEngine.Object menu = menuProp.objectReferenceValue;
+            if (menu != null) CollectUsedParametersFromMenu(menu, used, new HashSet<UnityEngine.Object>());
+        }
+    }
+
+    private static void CollectUsedParametersFromMenu(UnityEngine.Object menu, HashSet<string> used, HashSet<UnityEngine.Object> visited)
+    {
+        if (menu == null || !visited.Add(menu)) return; // サブメニューの循環参照対策
+
+        SerializedObject so = new SerializedObject(menu);
+        SerializedProperty controlsProp = so.FindProperty("controls");
+        if (controlsProp == null || !controlsProp.isArray) return;
+
+        for (int i = 0; i < controlsProp.arraySize; i++)
+        {
+            SerializedProperty control = controlsProp.GetArrayElementAtIndex(i);
+
+            SerializedProperty paramProp = control.FindPropertyRelative("parameter");
+            SerializedProperty nameProp = paramProp?.FindPropertyRelative("name");
+            if (nameProp != null && !string.IsNullOrEmpty(nameProp.stringValue)) used.Add(nameProp.stringValue);
+
+            SerializedProperty subParamsProp = control.FindPropertyRelative("subParameters");
+            if (subParamsProp != null && subParamsProp.isArray)
+            {
+                for (int j = 0; j < subParamsProp.arraySize; j++)
+                {
+                    SerializedProperty subName = subParamsProp.GetArrayElementAtIndex(j).FindPropertyRelative("name");
+                    if (subName != null && !string.IsNullOrEmpty(subName.stringValue)) used.Add(subName.stringValue);
+                }
+            }
+
+            SerializedProperty subMenuProp = control.FindPropertyRelative("subMenu");
+            if (subMenuProp != null && subMenuProp.objectReferenceValue != null)
+            {
+                CollectUsedParametersFromMenu(subMenuProp.objectReferenceValue, used, visited);
+            }
         }
     }
 
