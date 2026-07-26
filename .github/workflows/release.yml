@@ -80,13 +80,23 @@ jobs:
 
             ZIP_URL=$(echo "$ASSETS_JSON" | jq -r --arg n "$ZIP_ASSET_NAME" '.assets[] | select(.name == $n) | .url')
 
-            curl -sL "$PKG_URL" -o "$WORK_DIR/pkg.json"
+            curl -sL -H "Authorization: Bearer $GH_TOKEN" "$PKG_URL" -o "$WORK_DIR/pkg.json"
+
+            if ! jq -e . "$WORK_DIR/pkg.json" > /dev/null 2>&1; then
+              echo "Skipping $TAG: package.json asset did not contain valid JSON"
+              continue
+            fi
+
             VERSION=$(jq -r .version "$WORK_DIR/pkg.json")
+            if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+              echo "Skipping $TAG: package.json has no version field"
+              continue
+            fi
 
             SHA=""
             if [ -n "$SHA_ASSET_NAME" ] && [ "$SHA_ASSET_NAME" != "null" ]; then
               SHA_URL=$(echo "$ASSETS_JSON" | jq -r --arg n "$SHA_ASSET_NAME" '.assets[] | select(.name == $n) | .url')
-              SHA=$(curl -sL "$SHA_URL" | awk '{print $1}')
+              SHA=$(curl -sL -H "Authorization: Bearer $GH_TOKEN" "$SHA_URL" | awk '{print $1}')
             fi
 
             ENTRY=$(jq --arg url "https://github.com/$REPO/releases/download/$TAG/$ZIP_ASSET_NAME" --arg sha "$SHA" \
