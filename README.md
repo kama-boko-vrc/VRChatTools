@@ -1,6 +1,6 @@
 # VRChatTools
 
-VRChatアバター制作用のUnityエディタ拡張集。
+VRChatアバター改変用のUnityエディタ拡張集。
 
 ## インストール
 
