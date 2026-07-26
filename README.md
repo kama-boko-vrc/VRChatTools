@@ -8,7 +8,7 @@ VRChatアバター制作用のUnityエディタ拡張集。
 
 以下のリンクからリポジトリを追加してください。
 
-[![Add to VCC](https://img.shields.io/badge/Add%20to-VCC-blue)](vcc://vpm/addRepo?url=https://kama-boko-vrc.github.io/VRChatTools/index.json)
+[Add to VCC](vcc://vpm/addRepo?url=https://kama-boko-vrc.github.io/VRChatTools/index.json)
 
 または、VCC/ALCOMの「Settings > Packages > Add Repository」から以下のURLを直接追加することもできます。
 
