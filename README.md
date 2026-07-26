@@ -2,6 +2,26 @@
 
 VRChatアバター制作用のUnityエディタ拡張集。
 
+## インストール
+
+### VCC / ALCOM（推奨）
+
+以下のリンクからリポジトリを追加してください。
+
+[![Add to VCC](https://img.shields.io/badge/Add%20to-VCC-blue)](vcc://vpm/addRepo?url=https://kama-boko-vrc.github.io/VRChatTools/index.json)
+
+または、VCC/ALCOMの「Settings > Packages > Add Repository」から以下のURLを直接追加することもできます。
+
+```
+https://kama-boko-vrc.github.io/VRChatTools/index.json
+```
+
+追加後、プロジェクトの「Manage Project」画面から `VRChatTools` パッケージを追加すると、以下の全ツールがまとめて導入されます。
+
+### 手動導入
+
+VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接Unityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーしても利用できます（`#if UNITY_EDITOR` で囲んであるためビルドには含まれません）。
+
 ## ArmatureScaleCopier
 
 同一構造のArmature間で、各ボーンの `localScale` と `MA Scale Adjuster`（型名に "ScaleAdjuster" を含むコンポーネント）をコピーするエディタ拡張です。
@@ -9,11 +29,9 @@ VRChatアバター制作用のUnityエディタ拡張集。
 - A: コピー元（アバター本体のArmature）
 - B: コピー先（衣装・髪など、一部ボーンが欠損している可能性があるArmature）
 
-VCC対応は行っておらず、`.cs` ファイルを直接プロジェクトの `Assets` フォルダ配下に配置して使う想定です（`#if UNITY_EDITOR` で囲んであるためビルドには含まれません）。
-
 ### 導入方法
 
-[ArmatureScaleCopier/ArmatureScaleCopier.cs](ArmatureScaleCopier/ArmatureScaleCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+[Editor/ArmatureScaleCopier/ArmatureScaleCopier.cs](Editor/ArmatureScaleCopier/ArmatureScaleCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
 
 ### 使い方
 
@@ -28,7 +46,7 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ### 導入方法
 
-[ScaleResetter/ScaleResetter.cs](ScaleResetter/ScaleResetter.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+[Editor/ScaleResetter/ScaleResetter.cs](Editor/ScaleResetter/ScaleResetter.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
 
 ### 使い方
 
@@ -42,7 +60,7 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ### 導入方法
 
-[ArmatureComponentCleaner/ArmatureComponentCleaner.cs](ArmatureComponentCleaner/ArmatureComponentCleaner.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+[Editor/ArmatureComponentCleaner/ArmatureComponentCleaner.cs](Editor/ArmatureComponentCleaner/ArmatureComponentCleaner.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
 
 ### 使い方
 
@@ -56,7 +74,7 @@ VCC対応は行っておらず、`.cs` ファイルを直接プロジェクト�
 
 ### 導入方法
 
-[LilToonPropertyCopier/LilToonPropertyCopier.cs](LilToonPropertyCopier/LilToonPropertyCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
+[Editor/LilToonPropertyCopier/LilToonPropertyCopier.cs](Editor/LilToonPropertyCopier/LilToonPropertyCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
 
 ### 使い方
 
