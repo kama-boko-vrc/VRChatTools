@@ -1,0 +1,50 @@
+{
+  "name": "VRChatTools",
+  "id": "com.kama-boko-vrc.vrchat-tools-repo",
+  "author": "kama-boko-vrc",
+  "url": "https://kama-boko-vrc.github.io/VRChatTools/index.json",
+  "packages": {
+    "com.kama-boko-vrc.vrchat-tools": {
+      "versions": {
+        "0.0.2": {
+          "name": "com.kama-boko-vrc.vrchat-tools",
+          "displayName": "VRChatTools",
+          "version": "0.0.2",
+          "unity": "2022.3",
+          "unityRelease": "22f1",
+          "description": "VRChatアバター制作用のUnityエディタ拡張集",
+          "author": {
+            "name": "kama-boko-vrc",
+            "url": "https://github.com/kama-boko-vrc"
+          },
+          "url": "https://github.com/kama-boko-vrc/VRChatTools/releases/download/v0.0.2/com.kama-boko-vrc.vrchat-tools-0.0.2.zip",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/kama-boko-vrc/VRChatTools.git"
+          },
+          "license": "MIT",
+          "zipSHA256": "0d0ed4ff486d34b3ff8758ef7c40180d00880e88eb5f33cc068af7931ab485ca"
+        },
+        "0.0.1": {
+          "name": "com.kama-boko-vrc.vrchat-tools",
+          "displayName": "VRChatTools",
+          "version": "0.0.1",
+          "unity": "2022.3",
+          "unityRelease": "22f1",
+          "description": "VRChatアバター制作用のUnityエディタ拡張集",
+          "author": {
+            "name": "kama-boko-vrc",
+            "url": "https://github.com/kama-boko-vrc"
+          },
+          "url": "https://github.com/kama-boko-vrc/VRChatTools/releases/download/v0.0.1/com.kama-boko-vrc.vrchat-tools-0.0.1.zip",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/kama-boko-vrc/VRChatTools.git"
+          },
+          "license": "MIT",
+          "zipSHA256": "9621c334449daecfa787ff353c4b1194f6d2dc0d2b522f0c15b2ba50b293502b"
+        }
+      }
+    }
+  }
+}
