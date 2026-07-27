@@ -29,10 +29,6 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 - A: コピー元（アバター本体のArmature）
 - B: コピー先（衣装・髪など、一部ボーンが欠損している可能性があるArmature）
 
-### 導入方法
-
-[Editor/ArmatureScaleCopier/ArmatureScaleCopier.cs](Editor/ArmatureScaleCopier/ArmatureScaleCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
-
 ### 使い方
 
 1. メニューから `Tools > VRChatTools > Armature Scale Copier` を開く
@@ -44,10 +40,6 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 指定したTransformとその配下すべての `localScale` を `(1, 1, 1)` にリセットするエディタ拡張です。
 
-### 導入方法
-
-[Editor/ScaleResetter/ScaleResetter.cs](Editor/ScaleResetter/ScaleResetter.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
-
 ### 使い方
 
 1. メニューから `Tools > VRChatTools > Scale Resetter` を開く
@@ -58,10 +50,6 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 指定したTransformとその配下すべてから、Transform以外の全コンポーネントを再帰的に削除するエディタ拡張です。
 
-### 導入方法
-
-[Editor/ArmatureComponentCleaner/ArmatureComponentCleaner.cs](Editor/ArmatureComponentCleaner/ArmatureComponentCleaner.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
-
 ### 使い方
 
 1. メニューから `Tools > VRChatTools > Armature Component Cleaner` を開く
@@ -71,10 +59,6 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 ## LilToonPropertyCopier
 
 1つのマテリアル（コピー元）から、選択したシェーダープロパティのみを複数のマテリアル（コピー先）へ一括コピーするエディタ拡張です。lilToonに限らず、コピー元・コピー先が同じシェーダーであれば利用できます。
-
-### 導入方法
-
-[Editor/LilToonPropertyCopier/LilToonPropertyCopier.cs](Editor/LilToonPropertyCopier/LilToonPropertyCopier.cs) をUnityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーします。
 
 ### 使い方
 
