@@ -60,40 +60,47 @@ public class VRChatToolsHub : EditorWindow
     };
 
     private int selectedIndex;
+    private Vector2 listScroll;
 
     [MenuItem("Tools/VRChatTools/Tool Hub")]
     private static void ShowWindow()
     {
         VRChatToolsHub window = GetWindow<VRChatToolsHub>("VRChatTools Hub");
-        window.minSize = new Vector2(480, 280);
+        window.minSize = new Vector2(560, 340);
     }
 
     private void OnGUI()
     {
         EditorGUILayout.BeginHorizontal();
         DrawToolList();
+        GUILayout.Space(8);
         DrawDescription();
         EditorGUILayout.EndHorizontal();
     }
 
     private void DrawToolList()
     {
-        EditorGUILayout.BeginVertical(GUILayout.Width(180));
+        EditorGUILayout.BeginVertical(GUILayout.Width(220));
         EditorGUILayout.LabelField("ツール一覧", EditorStyles.boldLabel);
+
+        listScroll = EditorGUILayout.BeginScrollView(listScroll);
 
         for (int i = 0; i < Tools.Length; i++)
         {
             Color previousColor = GUI.backgroundColor;
             GUI.backgroundColor = i == selectedIndex ? Color.cyan : previousColor;
 
-            if (GUILayout.Button(Tools[i].name))
+            if (GUILayout.Button(Tools[i].name, GUILayout.Height(24)))
             {
                 selectedIndex = i;
             }
 
             GUI.backgroundColor = previousColor;
+
+            GUILayout.Space(2);
         }
 
+        EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
     }
 
