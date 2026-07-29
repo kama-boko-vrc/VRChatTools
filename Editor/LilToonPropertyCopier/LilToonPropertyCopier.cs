@@ -103,7 +103,8 @@ public class LilToonPropertyCopier : EditorWindow
     private void SetAllSelected(bool value)
     {
         Shader shader = sourceMaterial.shader;
-        for (int i = 0; i < shader.GetPropertyCount(); i++)
+        int propertyCount = shader.GetPropertyCount();
+        for (int i = 0; i < propertyCount; i++)
         {
             selectedProperties[shader.GetPropertyName(i)] = value;
         }
@@ -112,6 +113,7 @@ public class LilToonPropertyCopier : EditorWindow
     private void Execute()
     {
         Shader shader = sourceMaterial.shader;
+        int propertyCount = shader.GetPropertyCount();
         int copiedProperties = 0;
 
         foreach (Material target in targetMaterials)
@@ -120,7 +122,7 @@ public class LilToonPropertyCopier : EditorWindow
 
             Undo.RecordObject(target, "Copy LilToon Properties");
 
-            for (int i = 0; i < shader.GetPropertyCount(); i++)
+            for (int i = 0; i < propertyCount; i++)
             {
                 string propName = shader.GetPropertyName(i);
                 if (!selectedProperties.TryGetValue(propName, out bool selected) || !selected) continue;

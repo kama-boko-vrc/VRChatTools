@@ -335,15 +335,16 @@ public class AvatarMenuOrganizer : EditorWindow
                 : $"{name} [{typeName}] (param: {paramName})";
 
             string key = $"{menu.GetInstanceID()}_{i}";
-            node.controls.Add(new ControlEntry
+            ControlEntry entry = new ControlEntry
             {
                 index = i,
                 label = label,
                 parameterName = paramName,
                 isUnused = isUnused,
                 key = key
-            });
-            node.controls[node.controls.Count - 1].subParameterNames.AddRange(subParameterNames);
+            };
+            entry.subParameterNames.AddRange(subParameterNames);
+            node.controls.Add(entry);
             controlSelected[key] = false;
         }
     }

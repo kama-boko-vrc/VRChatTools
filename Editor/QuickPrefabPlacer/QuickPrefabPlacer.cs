@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 複数のプレハブを登録しておき、ヒエラルキーの右クリックメニュー（GameObjectメニュー）の
@@ -179,7 +180,7 @@ public class QuickPrefabPlacer : EditorWindow
         }
         else
         {
-            foreach (GameObject root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            foreach (GameObject root in SceneManager.GetActiveScene().GetRootGameObjects())
             {
                 existingNames.Add(root.name);
             }
