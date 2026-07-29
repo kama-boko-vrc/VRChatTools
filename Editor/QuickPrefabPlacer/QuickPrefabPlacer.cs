@@ -7,14 +7,14 @@ using UnityEngine;
 
 /// <summary>
 /// 複数のプレハブを登録しておき、ヒエラルキーの右クリックメニュー（GameObjectメニュー）の
-/// 「クイックプレハブを配置」サブメニューから選んでワンクリック配置できるエディタ拡張。
+/// 「prefabを配置」サブメニューから選んでワンクリック配置できるエディタ拡張。
 /// サブメニュー項目は登録内容に応じてMenu.AddMenuItemで動的に生成される。
 /// 登録内容はEditorPrefsに保存され、プロジェクト内で永続化される（マシン/ユーザーごと）。
 /// </summary>
 public class QuickPrefabPlacer : EditorWindow
 {
     private const string PrefsKey = "VRChatTools.QuickPrefabPlacer.PrefabGuids";
-    private const string MenuRoot = "GameObject/クイックプレハブを配置/";
+    private const string MenuRoot = "GameObject/prefabを配置/";
 
     [Serializable]
     private class GuidListWrapper
@@ -42,7 +42,7 @@ public class QuickPrefabPlacer : EditorWindow
     {
         EditorGUILayout.HelpBox(
             "ここで登録したプレハブは、ヒエラルキーを右クリックした際に表示される\n" +
-            "「GameObject > クイックプレハブを配置」のサブメニューから選んで配置できます\n" +
+            "「GameObject > prefabを配置」のサブメニューから選んで配置できます\n" +
             "（選択中のオブジェクトの子として配置。未選択時はシーン直下）。",
             MessageType.Info);
 
@@ -108,7 +108,7 @@ public class QuickPrefabPlacer : EditorWindow
         EditorPrefs.SetString(PrefsKey, JsonUtility.ToJson(wrapper));
     }
 
-    // 登録中のプレハブ一覧に合わせて、「GameObject/クイックプレハブを配置/」配下の
+    // 登録中のプレハブ一覧に合わせて、「GameObject/prefabを配置/」配下の
     // サブメニュー項目を作り直す（起動時・登録内容の変更時に呼ばれる）。
     // Menu.AddMenuItem/RemoveMenuItemはUnity内部APIでpublicではないため、リフレクション経由で呼び出す。
     internal static void RebuildMenu()
