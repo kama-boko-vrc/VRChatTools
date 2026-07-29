@@ -4,13 +4,16 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 複数のプレハブを登録しておき、ヒエラルキーの右クリックメニュー（GameObjectメニュー）から
-/// 「クイックプレハブを配置...」を選ぶと、登録済みプレハブの一覧から選択して配置できるようにする
-/// エディタ拡張。登録内容はEditorPrefsに保存され、プロジェクト内で永続化される（マシン/ユーザーごと）。
+/// 複数のプレハブを登録しておき、ヒエラルキーの右クリックメニュー（GameObjectメニュー）の
+/// 「クイックプレハブを配置」サブメニューから選んでワンクリック配置できるエディタ拡張。
+/// サブメニュー項目は登録内容に応じてMenu.AddMenuItemで動的に生成される。
+/// 登録内容はEditorPrefsに保存され、プロジェクト内で永続化される（マシン/ユーザーごと）。
 /// </summary>
+[InitializeOnLoad]
 public class QuickPrefabPlacer : EditorWindow
 {
     private const string PrefsKey = "VRChatTools.QuickPrefabPlacer.PrefabGuids";
+    private const string MenuRoot = "GameObject/クイックプレハブを配置/";
 
     [System.Serializable]
     private class GuidListWrapper
@@ -18,7 +21,14 @@ public class QuickPrefabPlacer : EditorWindow
         public List<string> guids = new List<string>();
     }
 
+    private static readonly List<string> registeredMenuPaths = new List<string>();
+
     private readonly List<GameObject> prefabs = new List<GameObject>();
+
+    static QuickPrefabPlacer()
+    {
+        RebuildMenu();
+    }
 
     [MenuItem("Tools/VRChatTools/Quick Prefab Placer")]
     private static void ShowWindow()
@@ -36,8 +46,8 @@ public class QuickPrefabPlacer : EditorWindow
     {
         EditorGUILayout.HelpBox(
             "ここで登録したプレハブは、ヒエラルキーを右クリックした際に表示される\n" +
-            "「GameObject > クイックプレハブを配置...」から一覧選択で配置できます\n" +
-            "（右クリックした対象の子として配置。未選択時はシーン直下）。",
+            "「GameObject > クイックプレハブを配置」のサブメニューから選んで配置できます\n" +
+            "（選択中のオブジェクトの子として配置。未選択時はシーン直下）。",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
@@ -63,6 +73,7 @@ public class QuickPrefabPlacer : EditorWindow
         if (EditorGUI.EndChangeCheck())
         {
             SavePrefabs(prefabs);
+            RebuildMenu();
         }
     }
 
@@ -101,39 +112,35 @@ public class QuickPrefabPlacer : EditorWindow
         EditorPrefs.SetString(PrefsKey, JsonUtility.ToJson(wrapper));
     }
 
-    [MenuItem("GameObject/クイックプレハブを配置...", false, 0)]
-    private static void ShowQuickPrefabMenu(MenuCommand command)
+    // 登録中のプレハブ一覧に合わせて、「GameObject/クイックプレハブを配置/」配下の
+    // サブメニュー項目を作り直す（起動時・登録内容の変更時に呼ばれる）。
+    private static void RebuildMenu()
     {
-        List<GameObject> registered = LoadPrefabs();
-        registered.RemoveAll(p => p == null);
-
-        if (registered.Count == 0)
+        foreach (string path in registeredMenuPaths)
         {
-            Debug.LogWarning("[QuickPrefabPlacer] 配置できるプレハブが登録されていません。" +
-                             "Tools > VRChatTools > Quick Prefab Placer で登録してください。");
-            return;
+            Menu.RemoveMenuItem(path);
         }
+        registeredMenuPaths.Clear();
 
-        GameObject parent = command.context as GameObject;
-
-        // ヒエラルキーの右クリックメニューのコールバック内でGenericMenu.ShowAsContext()を
-        // 呼ぶと、元のコンテキストメニューが閉じる処理と競合して表示されないことがあるため、
-        // 独立したポップアップウィンドウで選択させる。
-        QuickPrefabPickerWindow.Open(registered, parent);
-    }
-
-    [MenuItem("GameObject/クイックプレハブを配置...", true)]
-    private static bool ValidateShowQuickPrefabMenu()
-    {
         List<GameObject> registered = LoadPrefabs();
         registered.RemoveAll(p => p == null);
-        return registered.Count > 0;
+
+        int priority = 0;
+        foreach (GameObject prefab in registered)
+        {
+            GameObject captured = prefab;
+            string menuPath = MenuRoot + captured.name;
+
+            Menu.AddMenuItem(menuPath, "", false, priority++, () => PlaceFromSelection(captured), () => captured != null);
+            registeredMenuPaths.Add(menuPath);
+        }
     }
 
-    private static void PlacePrefab(GameObject prefabAsset, GameObject parent)
+    private static void PlaceFromSelection(GameObject prefabAsset)
     {
-        GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefabAsset);
+        GameObject parent = Selection.activeGameObject;
 
+        GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefabAsset);
         instance.name = GetUniqueName(parent != null ? parent.transform : null, prefabAsset.name);
 
         if (parent != null)
@@ -177,47 +184,6 @@ public class QuickPrefabPlacer : EditorWindow
         } while (existingNames.Contains(candidate));
 
         return candidate;
-    }
-
-    // クイックプレハブ配置用のプレハブ選択ポップアップ。
-    // GenericMenuの入れ子表示が右クリックメニュー内では不安定なため、代わりに
-    // クリックすると自動的に閉じる小さなウィンドウ（ShowAsDropDown）で選択させる。
-    private class QuickPrefabPickerWindow : EditorWindow
-    {
-        private List<GameObject> options;
-        private GameObject parent;
-
-        public static void Open(List<GameObject> options, GameObject parent)
-        {
-            QuickPrefabPickerWindow window = CreateInstance<QuickPrefabPickerWindow>();
-            window.options = options;
-            window.parent = parent;
-
-            float height = Mathf.Min(options.Count, 10) * EditorGUIUtility.singleLineHeight + 8;
-            Vector2 size = new Vector2(220, height);
-
-            // MenuItemのコールバック内ではEvent.currentが使えないため、マウス直下ではなく
-            // 直近でフォーカスされていたウィンドウ（右クリック元のヒエラルキーなど）の左上付近を基準にする。
-            EditorWindow focused = focusedWindow;
-            Vector2 origin = focused != null
-                ? new Vector2(focused.position.x + 20, focused.position.y + 40)
-                : new Vector2(100, 100);
-
-            window.ShowAsDropDown(new Rect(origin, Vector2.zero), size);
-        }
-
-        private void OnGUI()
-        {
-            foreach (GameObject prefab in options)
-            {
-                if (GUILayout.Button(prefab.name))
-                {
-                    PlacePrefab(prefab, parent);
-                    Close();
-                    break;
-                }
-            }
-        }
     }
 }
 #endif
