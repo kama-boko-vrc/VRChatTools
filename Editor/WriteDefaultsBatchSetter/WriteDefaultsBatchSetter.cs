@@ -25,8 +25,7 @@ public class WriteDefaultsBatchSetter : EditorWindow
     private readonly List<ControllerSummary> summaries = new List<ControllerSummary>();
     private bool hasScanned;
 
-    [MenuItem("Tools/VRChatTools/Write Defaults Batch Setter")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         GetWindow<WriteDefaultsBatchSetter>("Write Defaults Batch Setter");
     }

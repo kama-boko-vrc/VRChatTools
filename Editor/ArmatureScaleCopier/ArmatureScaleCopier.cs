@@ -20,8 +20,7 @@ public class ArmatureScaleCopier : EditorWindow
     private int copiedComponentCount;
     private int missingBoneCount;
 
-    [MenuItem("Tools/VRChatTools/Armature Scale Copier")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         GetWindow<ArmatureScaleCopier>("Armature Scale Copier");
     }
