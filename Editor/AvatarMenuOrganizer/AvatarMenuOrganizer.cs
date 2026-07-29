@@ -51,8 +51,7 @@ public class AvatarMenuOrganizer : EditorWindow
     private Vector2 scroll;
     private bool hasScanned;
 
-    [MenuItem("Tools/VRChatTools/Avatar Menu Organizer")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         AvatarMenuOrganizer window = GetWindow<AvatarMenuOrganizer>("Avatar Menu Organizer");
         window.minSize = new Vector2(440, 560);

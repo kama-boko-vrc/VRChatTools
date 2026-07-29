@@ -22,6 +22,16 @@ https://kama-boko-vrc.github.io/VRChatTools/index.json
 
 VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接Unityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーしても利用できます（`#if UNITY_EDITOR` で囲んであるためビルドには含まれません）。
 
+## VRChatToolsHub
+
+全ツールを一覧表示し、選択したツールの簡単な説明を確認しながら開けるハブウィンドウです。どのツールがどんな機能か忘れた時の入り口として使えます。各ツールは個別のメニュー項目を持たず、このハブからのみ開きます。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools` を開く
+2. 左側の一覧からツールを選ぶと、右側に簡単な説明が表示されます
+3. 「ツールを開く」で、そのツール本体のウィンドウが開きます
+
 ## ArmatureScaleCopier
 
 同一構造のArmature間で、各ボーンの `localScale` と `MA Scale Adjuster`（型名に "ScaleAdjuster" を含むコンポーネント）をコピーするエディタ拡張です。
@@ -31,7 +41,7 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Armature Scale Copier` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Armature Scale Copier」を選んで開く
 2. A（コピー元）とB（コピー先）にそれぞれのArmatureのTransformをドラッグ&ドロップ
 3. 「コピー実行」を押すと、ボーン名が一致する箇所を再帰的にたどりながら `localScale` と `MA Scale Adjuster` をコピー
    - Bに存在しないボーンはスキップされ、実行後にログで件数が表示されます
@@ -42,7 +52,7 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Scale Resetter` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Scale Resetter」を選んで開く
 2. 「対象」にリセットしたい階層のルートTransformをドラッグ&ドロップ
 3. 「スケールを1.0にリセット」を押すと、対象とその配下すべてのTransformの `localScale` が `(1,1,1)` にリセットされます
 
@@ -52,7 +62,7 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Armature Component Cleaner` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Armature Component Cleaner」を選んで開く
 2. 「対象」に処理したい階層のルートTransformをドラッグ&ドロップ
 3. 「Transform以外を削除」を押すと、対象とその配下すべてのGameObjectからTransform以外のコンポーネントが再帰的に削除されます（Undo対応、Ctrl+Zで復元可）
 
@@ -62,7 +72,7 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > LilToon Property Copier` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「LilToon Property Copier」を選んで開く
 2. 「コピー元」にマテリアルを1つ設定
 3. 「+ コピー先を追加」でコピー先のマテリアルを複数登録
 4. コピー元のシェーダープロパティ一覧がチェックボックスで表示されるので、コピーしたい項目を選択（全選択/全解除ボタンあり）
@@ -74,7 +84,7 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Write Defaults Batch Setter` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Write Defaults Batch Setter」を選んで開く
 2. 「アバタールート」にアバターのルートを設定
 3. 「スキャン」を押すと、Controllerごと・合計のState数とON/OFF件数が表示されます
 4. 「全StateをONにする」/「全StateをOFFにする」で、全Controllerの全Stateに一括反映されます（Undo対応）
@@ -95,7 +105,7 @@ VRCSDKへの直接参照は持たせず、SerializedObject経由でVRCAvatarDesc
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Avatar Menu Organizer` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Avatar Menu Organizer」を選んで開く
 2. 「アバタールート」にアバターのルートを設定
 3. 「スキャン」を押すと、Expressions Menuのツリーと、全Animator Controllerのレイヤー・パラメータがチェックリスト形式で表示されます（デフォルト全解除、それぞれに全選択/全解除ボタンあり）
 4. 「選択したメニュー・レイヤー・パラメータを削除」で、選択した項目のみ一括削除されます（Undo対応）
@@ -106,7 +116,7 @@ VRCSDKへの直接参照は持たせず、SerializedObject経由でVRCAvatarDesc
 
 ### 使い方
 
-1. メニューから `Tools > VRChatTools > Quick Prefab Placer` を開く
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Quick Prefab Placer」を選んで開く
 2. 「+ プレハブを追加」で配置したいプレハブを登録（複数可、`-`で削除）
 3. ヒエラルキーを右クリック（またはGameObjectメニュー）→「prefabを配置」にカーソルを合わせると、登録済みプレハブ名のサブメニューが表示されます
 4. サブメニューから選ぶと、選択中のオブジェクトの子として配置されます（未選択時はシーン直下、Undo対応）
