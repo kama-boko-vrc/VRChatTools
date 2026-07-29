@@ -94,9 +94,7 @@ public class WriteDefaultsBatchSetter : EditorWindow
     {
         summaries.Clear();
 
-        HashSet<AnimatorController> controllers = new HashSet<AnimatorController>();
-        CollectControllersFromAvatarDescriptor(avatarRoot.gameObject, controllers);
-        CollectControllersFromAnimators(avatarRoot.gameObject, controllers);
+        HashSet<AnimatorController> controllers = AvatarUtility.CollectAnimatorControllers(avatarRoot.gameObject);
 
         foreach (AnimatorController controller in controllers)
         {
@@ -133,6 +131,9 @@ public class WriteDefaultsBatchSetter : EditorWindow
     {
         int changedCount = 0;
 
+        Undo.SetCurrentGroupName("Set Write Defaults");
+        int undoGroup = Undo.GetCurrentGroup();
+
         foreach (ControllerSummary summary in summaries)
         {
             foreach (AnimatorControllerLayer layer in summary.controller.layers)
@@ -140,6 +141,8 @@ public class WriteDefaultsBatchSetter : EditorWindow
                 if (layer.stateMachine != null) changedCount += ApplyToStateMachine(layer.stateMachine, value);
             }
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[WriteDefaultsBatchSetter] 完了: {changedCount}件のStateのWrite Defaultsを{(value ? "ON" : "OFF")}に変更しました");
 
@@ -168,37 +171,6 @@ public class WriteDefaultsBatchSetter : EditorWindow
         }
 
         return count;
-    }
-
-    private static void CollectControllersFromAvatarDescriptor(GameObject avatar, HashSet<AnimatorController> controllers)
-    {
-        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
-        {
-            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
-
-            SerializedObject so = new SerializedObject(comp);
-            CollectControllersFromLayerArray(so.FindProperty("baseAnimationLayers"), controllers);
-            CollectControllersFromLayerArray(so.FindProperty("specialAnimationLayers"), controllers);
-        }
-    }
-
-    private static void CollectControllersFromLayerArray(SerializedProperty arrayProp, HashSet<AnimatorController> controllers)
-    {
-        if (arrayProp == null || !arrayProp.isArray) return;
-
-        for (int i = 0; i < arrayProp.arraySize; i++)
-        {
-            SerializedProperty controllerProp = arrayProp.GetArrayElementAtIndex(i).FindPropertyRelative("animatorController");
-            if (controllerProp != null && controllerProp.objectReferenceValue is AnimatorController ac) controllers.Add(ac);
-        }
-    }
-
-    private static void CollectControllersFromAnimators(GameObject avatar, HashSet<AnimatorController> controllers)
-    {
-        foreach (Animator animator in avatar.GetComponentsInChildren<Animator>(true))
-        {
-            if (animator.runtimeAnimatorController is AnimatorController ac) controllers.Add(ac);
-        }
     }
 }
 #endif

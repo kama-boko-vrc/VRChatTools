@@ -216,12 +216,10 @@ public class AvatarMenuOrganizer : EditorWindow
 
         GameObject avatar = avatarRoot.gameObject;
 
-        HashSet<AnimatorController> controllers = new HashSet<AnimatorController>();
-        CollectControllersFromAvatarDescriptor(avatar, controllers);
-        CollectControllersFromAnimators(avatar, controllers);
+        HashSet<AnimatorController> controllers = AvatarUtility.CollectAnimatorControllers(avatar);
 
         HashSet<string> declaredParameterNames = new HashSet<string>();
-        CollectExpressionParameterNames(avatar, declaredParameterNames);
+        AvatarUtility.CollectExpressionParameterNames(avatar, declaredParameterNames);
         foreach (AnimatorController controller in controllers)
         {
             foreach (AnimatorControllerParameter p in controller.parameters) declaredParameterNames.Add(p.name);
@@ -229,7 +227,7 @@ public class AvatarMenuOrganizer : EditorWindow
 
         HashSet<string> usedByExpressionsMenu = new HashSet<string>();
 
-        Object rootMenu = FindExpressionsMenu(avatar);
+        Object rootMenu = AvatarUtility.FindExpressionsMenu(avatar);
         if (rootMenu != null)
         {
             CollectMenuTree(rootMenu, "Root", declaredParameterNames, usedByExpressionsMenu, new HashSet<Object>());
@@ -242,7 +240,7 @@ public class AvatarMenuOrganizer : EditorWindow
             HashSet<string> used = new HashSet<string>(usedByExpressionsMenu);
             foreach (AnimatorControllerLayer layer in controller.layers)
             {
-                if (layer.stateMachine != null) CollectUsedParameters(layer.stateMachine, used);
+                if (layer.stateMachine != null) AnimatorControllerUtility.CollectUsedParameters(layer.stateMachine, used);
             }
 
             foreach (AnimatorControllerLayer layer in controller.layers)
@@ -335,134 +333,17 @@ public class AvatarMenuOrganizer : EditorWindow
                 : $"{name} [{typeName}] (param: {paramName})";
 
             string key = $"{menu.GetInstanceID()}_{i}";
-            node.controls.Add(new ControlEntry
+            ControlEntry entry = new ControlEntry
             {
                 index = i,
                 label = label,
                 parameterName = paramName,
                 isUnused = isUnused,
                 key = key
-            });
-            node.controls[node.controls.Count - 1].subParameterNames.AddRange(subParameterNames);
+            };
+            entry.subParameterNames.AddRange(subParameterNames);
+            node.controls.Add(entry);
             controlSelected[key] = false;
-        }
-    }
-
-    private static Object FindExpressionsMenu(GameObject avatar)
-    {
-        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
-        {
-            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
-
-            SerializedObject so = new SerializedObject(comp);
-            SerializedProperty menuProp = so.FindProperty("expressionsMenu");
-            if (menuProp != null && menuProp.objectReferenceValue != null) return menuProp.objectReferenceValue;
-        }
-        return null;
-    }
-
-    private static void CollectExpressionParameterNames(GameObject avatar, HashSet<string> names)
-    {
-        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
-        {
-            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
-
-            SerializedObject so = new SerializedObject(comp);
-            Object paramsAsset = so.FindProperty("expressionParameters")?.objectReferenceValue;
-            if (paramsAsset == null) continue;
-
-            SerializedObject paramsSo = new SerializedObject(paramsAsset);
-            SerializedProperty parametersProp = paramsSo.FindProperty("parameters");
-            if (parametersProp == null || !parametersProp.isArray) continue;
-
-            for (int i = 0; i < parametersProp.arraySize; i++)
-            {
-                SerializedProperty nameProp = parametersProp.GetArrayElementAtIndex(i).FindPropertyRelative("name");
-                if (nameProp != null && !string.IsNullOrEmpty(nameProp.stringValue)) names.Add(nameProp.stringValue);
-            }
-        }
-    }
-
-    private static void CollectControllersFromAvatarDescriptor(GameObject avatar, HashSet<AnimatorController> controllers)
-    {
-        foreach (Component comp in avatar.GetComponentsInChildren<Component>(true))
-        {
-            if (comp == null || comp.GetType().Name != "VRCAvatarDescriptor") continue;
-
-            SerializedObject so = new SerializedObject(comp);
-            CollectControllersFromLayerArray(so.FindProperty("baseAnimationLayers"), controllers);
-            CollectControllersFromLayerArray(so.FindProperty("specialAnimationLayers"), controllers);
-        }
-    }
-
-    private static void CollectControllersFromLayerArray(SerializedProperty arrayProp, HashSet<AnimatorController> controllers)
-    {
-        if (arrayProp == null || !arrayProp.isArray) return;
-
-        for (int i = 0; i < arrayProp.arraySize; i++)
-        {
-            SerializedProperty controllerProp = arrayProp.GetArrayElementAtIndex(i).FindPropertyRelative("animatorController");
-            if (controllerProp != null && controllerProp.objectReferenceValue is AnimatorController ac) controllers.Add(ac);
-        }
-    }
-
-    private static void CollectControllersFromAnimators(GameObject avatar, HashSet<AnimatorController> controllers)
-    {
-        foreach (Animator animator in avatar.GetComponentsInChildren<Animator>(true))
-        {
-            if (animator.runtimeAnimatorController is AnimatorController ac) controllers.Add(ac);
-        }
-    }
-
-    private static void CollectUsedParameters(AnimatorStateMachine sm, HashSet<string> used)
-    {
-        foreach (AnimatorStateTransition t in sm.anyStateTransitions) CollectFromTransition(t, used);
-        foreach (AnimatorTransition t in sm.entryTransitions) CollectFromTransition(t, used);
-
-        foreach (ChildAnimatorState childState in sm.states)
-        {
-            AnimatorState state = childState.state;
-            CollectFromState(state, used);
-            foreach (AnimatorStateTransition t in state.transitions) CollectFromTransition(t, used);
-        }
-
-        foreach (ChildAnimatorStateMachine childSM in sm.stateMachines)
-        {
-            foreach (AnimatorTransition t in sm.GetStateMachineTransitions(childSM.stateMachine))
-            {
-                CollectFromTransition(t, used);
-            }
-            CollectUsedParameters(childSM.stateMachine, used);
-        }
-    }
-
-    private static void CollectFromTransition(AnimatorTransitionBase transition, HashSet<string> used)
-    {
-        foreach (AnimatorCondition cond in transition.conditions)
-        {
-            used.Add(cond.parameter);
-        }
-    }
-
-    private static void CollectFromState(AnimatorState state, HashSet<string> used)
-    {
-        if (state.timeParameterActive) used.Add(state.timeParameter);
-        if (state.speedParameterActive) used.Add(state.speedParameter);
-        if (state.cycleOffsetParameterActive) used.Add(state.cycleOffsetParameter);
-        if (state.mirrorParameterActive) used.Add(state.mirrorParameter);
-
-        if (state.motion is BlendTree tree) CollectFromBlendTree(tree, used);
-    }
-
-    private static void CollectFromBlendTree(BlendTree tree, HashSet<string> used)
-    {
-        if (!string.IsNullOrEmpty(tree.blendParameter)) used.Add(tree.blendParameter);
-        if (!string.IsNullOrEmpty(tree.blendParameterY)) used.Add(tree.blendParameterY);
-
-        foreach (ChildMotion child in tree.children)
-        {
-            if (!string.IsNullOrEmpty(child.directBlendParameter)) used.Add(child.directBlendParameter);
-            if (child.motion is BlendTree childTree) CollectFromBlendTree(childTree, used);
         }
     }
 
@@ -489,6 +370,9 @@ public class AvatarMenuOrganizer : EditorWindow
         int deletedControlCount = 0;
         int deletedLayerCount = 0;
         int deletedParameterCount = 0;
+
+        Undo.SetCurrentGroupName("Delete Selected Menu/Layers/Parameters");
+        int undoGroup = Undo.GetCurrentGroup();
 
         foreach (MenuNode node in menuNodes)
         {
@@ -558,6 +442,8 @@ public class AvatarMenuOrganizer : EditorWindow
 
             EditorUtility.SetDirty(controller);
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[AvatarMenuOrganizer] 完了: メニュー{deletedControlCount}件 / " +
                   $"レイヤー{deletedLayerCount}件 / パラメータ{deletedParameterCount}件を削除しました");

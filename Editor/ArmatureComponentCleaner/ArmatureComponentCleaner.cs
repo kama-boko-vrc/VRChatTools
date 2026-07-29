@@ -23,7 +23,8 @@ public class ArmatureComponentCleaner : EditorWindow
             "元に戻す場合はCtrl+Zで取り消せます。",
             MessageType.Warning);
 
-        root = (Transform)EditorGUILayout.ObjectField("対象", root, typeof(Transform), true);
+        EditorGUILayout.LabelField("対象");
+        root = (Transform)EditorGUILayout.ObjectField(root, typeof(Transform), true);
 
         EditorGUI.BeginDisabledGroup(root == null);
         if (GUILayout.Button("Transform以外を削除"))
