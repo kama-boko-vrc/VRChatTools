@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -428,7 +427,7 @@ public class AvatarMenuOrganizer : EditorWindow
 
             foreach (string layerName in layerNamesToDelete)
             {
-                int index = Array.FindIndex(controller.layers, l => l.name == layerName);
+                int index = System.Array.FindIndex(controller.layers, l => l.name == layerName);
                 if (index < 0) continue;
 
                 controller.RemoveLayer(index);
