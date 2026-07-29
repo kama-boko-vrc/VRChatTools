@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -114,11 +116,12 @@ public class QuickPrefabPlacer : EditorWindow
 
     // 登録中のプレハブ一覧に合わせて、「GameObject/クイックプレハブを配置/」配下の
     // サブメニュー項目を作り直す（起動時・登録内容の変更時に呼ばれる）。
+    // Menu.AddMenuItem/RemoveMenuItemはUnity内部APIでpublicではないため、リフレクション経由で呼び出す。
     private static void RebuildMenu()
     {
         foreach (string path in registeredMenuPaths)
         {
-            Menu.RemoveMenuItem(path);
+            InvokeRemoveMenuItem(path);
         }
         registeredMenuPaths.Clear();
 
@@ -131,9 +134,21 @@ public class QuickPrefabPlacer : EditorWindow
             GameObject captured = prefab;
             string menuPath = MenuRoot + captured.name;
 
-            Menu.AddMenuItem(menuPath, "", false, priority++, () => PlaceFromSelection(captured), () => captured != null);
+            InvokeAddMenuItem(menuPath, priority++, () => PlaceFromSelection(captured), () => captured != null);
             registeredMenuPaths.Add(menuPath);
         }
+    }
+
+    private static void InvokeAddMenuItem(string name, int priority, Action execute, Func<bool> validate)
+    {
+        MethodInfo method = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+        method?.Invoke(null, new object[] { name, "", false, priority, execute, validate });
+    }
+
+    private static void InvokeRemoveMenuItem(string name)
+    {
+        MethodInfo method = typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+        method?.Invoke(null, new object[] { name });
     }
 
     private static void PlaceFromSelection(GameObject prefabAsset)
