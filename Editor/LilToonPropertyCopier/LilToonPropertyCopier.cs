@@ -31,7 +31,8 @@ public class LilToonPropertyCopier : EditorWindow
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
-        sourceMaterial = (Material)EditorGUILayout.ObjectField("コピー元", sourceMaterial, typeof(Material), false);
+        EditorGUILayout.LabelField("コピー元");
+        sourceMaterial = (Material)EditorGUILayout.ObjectField(sourceMaterial, typeof(Material), false);
         if (EditorGUI.EndChangeCheck())
         {
             RefreshProperties();
@@ -103,7 +104,8 @@ public class LilToonPropertyCopier : EditorWindow
     private void SetAllSelected(bool value)
     {
         Shader shader = sourceMaterial.shader;
-        for (int i = 0; i < shader.GetPropertyCount(); i++)
+        int propertyCount = shader.GetPropertyCount();
+        for (int i = 0; i < propertyCount; i++)
         {
             selectedProperties[shader.GetPropertyName(i)] = value;
         }
@@ -112,7 +114,11 @@ public class LilToonPropertyCopier : EditorWindow
     private void Execute()
     {
         Shader shader = sourceMaterial.shader;
+        int propertyCount = shader.GetPropertyCount();
         int copiedProperties = 0;
+
+        Undo.SetCurrentGroupName("Copy LilToon Properties");
+        int undoGroup = Undo.GetCurrentGroup();
 
         foreach (Material target in targetMaterials)
         {
@@ -120,7 +126,7 @@ public class LilToonPropertyCopier : EditorWindow
 
             Undo.RecordObject(target, "Copy LilToon Properties");
 
-            for (int i = 0; i < shader.GetPropertyCount(); i++)
+            for (int i = 0; i < propertyCount; i++)
             {
                 string propName = shader.GetPropertyName(i);
                 if (!selectedProperties.TryGetValue(propName, out bool selected) || !selected) continue;
@@ -132,6 +138,8 @@ public class LilToonPropertyCopier : EditorWindow
 
             EditorUtility.SetDirty(target);
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[LilToonPropertyCopier] 完了: {targetMaterials.Count}件のマテリアルへ、計{copiedProperties}件のプロパティをコピーしました");
     }

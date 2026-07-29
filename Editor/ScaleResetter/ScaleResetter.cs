@@ -22,7 +22,8 @@ public class ScaleResetter : EditorWindow
             "指定したTransformとその配下すべてのlocalScaleを(1, 1, 1)にリセットします。",
             MessageType.Info);
 
-        root = (Transform)EditorGUILayout.ObjectField("対象", root, typeof(Transform), true);
+        EditorGUILayout.LabelField("対象");
+        root = (Transform)EditorGUILayout.ObjectField(root, typeof(Transform), true);
 
         EditorGUI.BeginDisabledGroup(root == null);
         if (GUILayout.Button("スケールを1.0にリセット"))

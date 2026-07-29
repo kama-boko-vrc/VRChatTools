@@ -153,7 +153,7 @@ public class QuickPrefabPlacer : EditorWindow
         GameObject parent = Selection.activeGameObject;
 
         GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefabAsset);
-        instance.name = GetUniqueName(parent != null ? parent.transform : null, prefabAsset.name);
+        instance.name = TransformUtility.GetUniqueSiblingName(parent != null ? parent.transform : null, prefabAsset.name);
 
         if (parent != null)
         {
@@ -162,40 +162,6 @@ public class QuickPrefabPlacer : EditorWindow
 
         Undo.RegisterCreatedObjectUndo(instance, "Place Quick Prefab");
         Selection.activeGameObject = instance;
-    }
-
-    // 配置先の兄弟（parentがnullならシーン直下）に同名オブジェクトがある場合、
-    // Unityの重複名規則に倣い "(1)", "(2)"... を付けて重複しない名前にする。
-    private static string GetUniqueName(Transform parent, string baseName)
-    {
-        HashSet<string> existingNames = new HashSet<string>();
-
-        if (parent != null)
-        {
-            foreach (Transform child in parent)
-            {
-                existingNames.Add(child.name);
-            }
-        }
-        else
-        {
-            foreach (GameObject root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
-            {
-                existingNames.Add(root.name);
-            }
-        }
-
-        if (!existingNames.Contains(baseName)) return baseName;
-
-        int index = 1;
-        string candidate;
-        do
-        {
-            candidate = $"{baseName} ({index})";
-            index++;
-        } while (existingNames.Contains(candidate));
-
-        return candidate;
     }
 }
 
