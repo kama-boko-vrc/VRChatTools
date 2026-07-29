@@ -6,6 +6,25 @@
   "packages": {
     "com.kama-boko-vrc.vrchat-tools": {
       "versions": {
+        "1.2.0": {
+          "name": "com.kama-boko-vrc.vrchat-tools",
+          "displayName": "VRChatTools",
+          "version": "1.2.0",
+          "unity": "2022.3",
+          "unityRelease": "22f1",
+          "description": "VRChatアバター改変用のUnityエディタ拡張集",
+          "author": {
+            "name": "kama-boko-vrc",
+            "url": "https://github.com/kama-boko-vrc"
+          },
+          "url": "https://github.com/kama-boko-vrc/VRChatTools/releases/download/v1.2.0/com.kama-boko-vrc.vrchat-tools-1.2.0.zip",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/kama-boko-vrc/VRChatTools.git"
+          },
+          "license": "MIT",
+          "zipSHA256": "90dd16b5beede804a47fc440d6d04dfe8ca7e95d49e8655bbfb7462cc16c8d83"
+        },
         "1.1.1": {
           "name": "com.kama-boko-vrc.vrchat-tools",
           "displayName": "VRChatTools",
