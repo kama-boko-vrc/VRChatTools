@@ -122,7 +122,11 @@ public class QuickPrefabPlacer : EditorWindow
             GameObject capturedPrefab = prefab;
             menu.AddItem(new GUIContent(capturedPrefab.name), false, () => PlacePrefab(capturedPrefab, parent));
         }
-        menu.ShowAsContext();
+
+        // ヒエラルキーの右クリックメニューからの呼び出し直後にShowAsContext()すると、
+        // 元のコンテキストメニューが閉じるタイミングと競合して表示されないことがあるため、
+        // 1フレーム遅延させて表示する。
+        EditorApplication.delayCall += () => menu.ShowAsContext();
     }
 
     [MenuItem("GameObject/クイックプレハブを配置...", true)]
