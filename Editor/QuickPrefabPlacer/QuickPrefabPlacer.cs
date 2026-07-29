@@ -11,7 +11,6 @@ using UnityEngine;
 /// サブメニュー項目は登録内容に応じてMenu.AddMenuItemで動的に生成される。
 /// 登録内容はEditorPrefsに保存され、プロジェクト内で永続化される（マシン/ユーザーごと）。
 /// </summary>
-[InitializeOnLoad]
 public class QuickPrefabPlacer : EditorWindow
 {
     private const string PrefsKey = "VRChatTools.QuickPrefabPlacer.PrefabGuids";
@@ -26,11 +25,6 @@ public class QuickPrefabPlacer : EditorWindow
     private static readonly List<string> registeredMenuPaths = new List<string>();
 
     private readonly List<GameObject> prefabs = new List<GameObject>();
-
-    static QuickPrefabPlacer()
-    {
-        RebuildMenu();
-    }
 
     [MenuItem("Tools/VRChatTools/Quick Prefab Placer")]
     private static void ShowWindow()
@@ -117,7 +111,7 @@ public class QuickPrefabPlacer : EditorWindow
     // 登録中のプレハブ一覧に合わせて、「GameObject/クイックプレハブを配置/」配下の
     // サブメニュー項目を作り直す（起動時・登録内容の変更時に呼ばれる）。
     // Menu.AddMenuItem/RemoveMenuItemはUnity内部APIでpublicではないため、リフレクション経由で呼び出す。
-    private static void RebuildMenu()
+    internal static void RebuildMenu()
     {
         foreach (string path in registeredMenuPaths)
         {
@@ -199,6 +193,19 @@ public class QuickPrefabPlacer : EditorWindow
         } while (existingNames.Contains(candidate));
 
         return candidate;
+    }
+}
+
+// [InitializeOnLoad]の静的コンストラクタからEditorPrefs等のUnity APIを呼ぶと、
+// QuickPrefabPlacer（ScriptableObjectを継承するEditorWindow）自身の静的コンストラクタ内では
+// 「ScriptableObjectのコンストラクタから呼べない」エラーになるため、
+// ScriptableObjectを継承しない別クラスに初期化処理を分離する。
+[InitializeOnLoad]
+internal static class QuickPrefabPlacerMenuInitializer
+{
+    static QuickPrefabPlacerMenuInitializer()
+    {
+        QuickPrefabPlacer.RebuildMenu();
     }
 }
 #endif
