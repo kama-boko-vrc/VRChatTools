@@ -106,7 +106,7 @@ public class VRChatToolsHub : EditorWindow
         EditorGUILayout.Space();
         EditorGUILayout.LabelField(tool.description, EditorStyles.wordWrappedLabel);
 
-        EditorGUILayout.FlexibleSpace();
+        GUILayout.FlexibleSpace();
 
         if (GUILayout.Button("ツールを開く"))
         {
