@@ -491,6 +491,9 @@ public class AvatarMenuOrganizer : EditorWindow
         int deletedLayerCount = 0;
         int deletedParameterCount = 0;
 
+        Undo.SetCurrentGroupName("Delete Selected Menu/Layers/Parameters");
+        int undoGroup = Undo.GetCurrentGroup();
+
         foreach (MenuNode node in menuNodes)
         {
             List<int> indicesToDelete = new List<int>();
@@ -559,6 +562,8 @@ public class AvatarMenuOrganizer : EditorWindow
 
             EditorUtility.SetDirty(controller);
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[AvatarMenuOrganizer] 完了: メニュー{deletedControlCount}件 / " +
                   $"レイヤー{deletedLayerCount}件 / パラメータ{deletedParameterCount}件を削除しました");

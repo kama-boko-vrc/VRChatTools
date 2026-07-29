@@ -133,6 +133,9 @@ public class WriteDefaultsBatchSetter : EditorWindow
     {
         int changedCount = 0;
 
+        Undo.SetCurrentGroupName("Set Write Defaults");
+        int undoGroup = Undo.GetCurrentGroup();
+
         foreach (ControllerSummary summary in summaries)
         {
             foreach (AnimatorControllerLayer layer in summary.controller.layers)
@@ -140,6 +143,8 @@ public class WriteDefaultsBatchSetter : EditorWindow
                 if (layer.stateMachine != null) changedCount += ApplyToStateMachine(layer.stateMachine, value);
             }
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[WriteDefaultsBatchSetter] 完了: {changedCount}件のStateのWrite Defaultsを{(value ? "ON" : "OFF")}に変更しました");
 

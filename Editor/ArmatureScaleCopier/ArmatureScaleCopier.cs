@@ -35,8 +35,10 @@ public class ArmatureScaleCopier : EditorWindow
             "Bに存在しないボーンはスキップされます。",
             MessageType.Info);
 
-        sourceRoot = (Transform)EditorGUILayout.ObjectField("A (コピー元)", sourceRoot, typeof(Transform), true);
-        targetRoot = (Transform)EditorGUILayout.ObjectField("B (コピー先)", targetRoot, typeof(Transform), true);
+        EditorGUILayout.LabelField("A (コピー元)");
+        sourceRoot = (Transform)EditorGUILayout.ObjectField(sourceRoot, typeof(Transform), true);
+        EditorGUILayout.LabelField("B (コピー先)");
+        targetRoot = (Transform)EditorGUILayout.ObjectField(targetRoot, typeof(Transform), true);
         copyScaleAdjuster = EditorGUILayout.Toggle("MA Scale Adjuster もコピー", copyScaleAdjuster);
 
         EditorGUI.BeginDisabledGroup(sourceRoot == null || targetRoot == null);

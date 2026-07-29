@@ -31,7 +31,8 @@ public class LilToonPropertyCopier : EditorWindow
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
-        sourceMaterial = (Material)EditorGUILayout.ObjectField("コピー元", sourceMaterial, typeof(Material), false);
+        EditorGUILayout.LabelField("コピー元");
+        sourceMaterial = (Material)EditorGUILayout.ObjectField(sourceMaterial, typeof(Material), false);
         if (EditorGUI.EndChangeCheck())
         {
             RefreshProperties();
@@ -116,6 +117,9 @@ public class LilToonPropertyCopier : EditorWindow
         int propertyCount = shader.GetPropertyCount();
         int copiedProperties = 0;
 
+        Undo.SetCurrentGroupName("Copy LilToon Properties");
+        int undoGroup = Undo.GetCurrentGroup();
+
         foreach (Material target in targetMaterials)
         {
             if (target == null) continue;
@@ -134,6 +138,8 @@ public class LilToonPropertyCopier : EditorWindow
 
             EditorUtility.SetDirty(target);
         }
+
+        Undo.CollapseUndoOperations(undoGroup);
 
         Debug.Log($"[LilToonPropertyCopier] 完了: {targetMaterials.Count}件のマテリアルへ、計{copiedProperties}件のプロパティをコピーしました");
     }
