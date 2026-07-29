@@ -22,6 +22,16 @@ https://kama-boko-vrc.github.io/VRChatTools/index.json
 
 VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接Unityプロジェクトの `Assets` フォルダ配下（`Editor` フォルダ推奨）にコピーしても利用できます（`#if UNITY_EDITOR` で囲んであるためビルドには含まれません）。
 
+## VRChatToolsHub
+
+全ツールを一覧表示し、選択したツールの簡単な説明を確認しながら開けるハブウィンドウです。どのツールがどんな機能か忘れた時の入り口として使えます。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > Tool Hub` を開く
+2. 左側の一覧からツールを選ぶと、右側に簡単な説明が表示されます
+3. 「ツールを開く」で、そのツール本体のウィンドウが開きます
+
 ## ArmatureScaleCopier
 
 同一構造のArmature間で、各ボーンの `localScale` と `MA Scale Adjuster`（型名に "ScaleAdjuster" を含むコンポーネント）をコピーするエディタ拡張です。
