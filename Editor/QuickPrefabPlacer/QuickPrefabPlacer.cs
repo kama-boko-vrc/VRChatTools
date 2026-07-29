@@ -16,7 +16,7 @@ public class QuickPrefabPlacer : EditorWindow
     private const string PrefsKey = "VRChatTools.QuickPrefabPlacer.PrefabGuids";
     private const string MenuRoot = "GameObject/クイックプレハブを配置/";
 
-    [System.Serializable]
+    [Serializable]
     private class GuidListWrapper
     {
         public List<string> guids = new List<string>();
@@ -125,24 +125,27 @@ public class QuickPrefabPlacer : EditorWindow
         int priority = 0;
         foreach (GameObject prefab in registered)
         {
-            GameObject captured = prefab;
-            string menuPath = MenuRoot + captured.name;
+            string menuPath = MenuRoot + prefab.name;
 
-            InvokeAddMenuItem(menuPath, priority++, () => PlaceFromSelection(captured), () => captured != null);
+            InvokeAddMenuItem(menuPath, priority++, () => PlaceFromSelection(prefab), () => prefab != null);
             registeredMenuPaths.Add(menuPath);
         }
     }
 
+    private static readonly MethodInfo AddMenuItemMethod =
+        typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+
+    private static readonly MethodInfo RemoveMenuItemMethod =
+        typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+
     private static void InvokeAddMenuItem(string name, int priority, Action execute, Func<bool> validate)
     {
-        MethodInfo method = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
-        method?.Invoke(null, new object[] { name, "", false, priority, execute, validate });
+        AddMenuItemMethod?.Invoke(null, new object[] { name, "", false, priority, execute, validate });
     }
 
     private static void InvokeRemoveMenuItem(string name)
     {
-        MethodInfo method = typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
-        method?.Invoke(null, new object[] { name });
+        RemoveMenuItemMethod?.Invoke(null, new object[] { name });
     }
 
     private static void PlaceFromSelection(GameObject prefabAsset)
