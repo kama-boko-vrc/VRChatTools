@@ -68,6 +68,17 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 4. コピー元のシェーダープロパティ一覧がチェックボックスで表示されるので、コピーしたい項目を選択（全選択/全解除ボタンあり）
 5. 「コピー実行」を押すと、選択したプロパティのみが全コピー先マテリアルへ一括反映されます（Undo対応）
 
+## WriteDefaultsBatchSetter
+
+アバターのルートを指定するだけで、使用している全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）の全State（サブステートマシン含む）についてWrite Defaultsの現在値を集計し、一括でON/OFFに変更するエディタ拡張です。ON/OFFが混在している場合は警告表示されます。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools > Write Defaults Batch Setter` を開く
+2. 「アバタールート」にアバターのルートを設定
+3. 「スキャン」を押すと、Controllerごと・合計のState数とON/OFF件数が表示されます
+4. 「全StateをONにする」/「全StateをOFFにする」で、全Controllerの全Stateに一括反映されます（Undo対応）
+
 ## AvatarMenuOrganizer
 
 アバターのルートを指定するだけで、Expressions Menu（ラジアルメニュー、サブメニュー含む）と、使用している全Animator Controller（VRCAvatarDescriptorの各Playable Layer、配下のAnimatorコンポーネント）のレイヤー・パラメータをまとめて一覧表示するエディタ拡張です。全メニューコントロール・全レイヤー・全パラメータにチェックボックスがあり、選択したものを一括削除できます。
