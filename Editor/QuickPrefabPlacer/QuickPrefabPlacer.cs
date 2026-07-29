@@ -116,17 +116,10 @@ public class QuickPrefabPlacer : EditorWindow
 
         GameObject parent = command.context as GameObject;
 
-        GenericMenu menu = new GenericMenu();
-        foreach (GameObject prefab in registered)
-        {
-            GameObject capturedPrefab = prefab;
-            menu.AddItem(new GUIContent(capturedPrefab.name), false, () => PlacePrefab(capturedPrefab, parent));
-        }
-
-        // ヒエラルキーの右クリックメニューからの呼び出し直後にShowAsContext()すると、
-        // 元のコンテキストメニューが閉じるタイミングと競合して表示されないことがあるため、
-        // 1フレーム遅延させて表示する。
-        EditorApplication.delayCall += () => menu.ShowAsContext();
+        // ヒエラルキーの右クリックメニューのコールバック内でGenericMenu.ShowAsContext()を
+        // 呼ぶと、元のコンテキストメニューが閉じる処理と競合して表示されないことがあるため、
+        // 独立したポップアップウィンドウで選択させる。
+        QuickPrefabPickerWindow.Open(registered, parent);
     }
 
     [MenuItem("GameObject/クイックプレハブを配置...", true)]
@@ -184,6 +177,47 @@ public class QuickPrefabPlacer : EditorWindow
         } while (existingNames.Contains(candidate));
 
         return candidate;
+    }
+
+    // クイックプレハブ配置用のプレハブ選択ポップアップ。
+    // GenericMenuの入れ子表示が右クリックメニュー内では不安定なため、代わりに
+    // クリックすると自動的に閉じる小さなウィンドウ（ShowAsDropDown）で選択させる。
+    private class QuickPrefabPickerWindow : EditorWindow
+    {
+        private List<GameObject> options;
+        private GameObject parent;
+
+        public static void Open(List<GameObject> options, GameObject parent)
+        {
+            QuickPrefabPickerWindow window = CreateInstance<QuickPrefabPickerWindow>();
+            window.options = options;
+            window.parent = parent;
+
+            float height = Mathf.Min(options.Count, 10) * EditorGUIUtility.singleLineHeight + 8;
+            Vector2 size = new Vector2(220, height);
+
+            // MenuItemのコールバック内ではEvent.currentが使えないため、マウス直下ではなく
+            // 直近でフォーカスされていたウィンドウ（右クリック元のヒエラルキーなど）の左上付近を基準にする。
+            EditorWindow focused = focusedWindow;
+            Vector2 origin = focused != null
+                ? new Vector2(focused.position.x + 20, focused.position.y + 40)
+                : new Vector2(100, 100);
+
+            window.ShowAsDropDown(new Rect(origin, Vector2.zero), size);
+        }
+
+        private void OnGUI()
+        {
+            foreach (GameObject prefab in options)
+            {
+                if (GUILayout.Button(prefab.name))
+                {
+                    PlacePrefab(prefab, parent);
+                    Close();
+                    break;
+                }
+            }
+        }
     }
 }
 #endif
