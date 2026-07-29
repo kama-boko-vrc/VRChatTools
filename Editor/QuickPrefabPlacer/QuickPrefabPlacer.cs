@@ -26,8 +26,7 @@ public class QuickPrefabPlacer : EditorWindow
 
     private readonly List<GameObject> prefabs = new List<GameObject>();
 
-    [MenuItem("Tools/VRChatTools/Quick Prefab Placer")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         GetWindow<QuickPrefabPlacer>("Quick Prefab Placer");
     }

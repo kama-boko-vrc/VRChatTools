@@ -16,8 +16,7 @@ public class LilToonPropertyCopier : EditorWindow
     private readonly Dictionary<string, bool> selectedProperties = new Dictionary<string, bool>();
     private Vector2 scroll;
 
-    [MenuItem("Tools/VRChatTools/LilToon Property Copier")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         LilToonPropertyCopier window = GetWindow<LilToonPropertyCopier>("LilToon Property Copier");
         window.minSize = new Vector2(400, 500);

@@ -10,8 +10,7 @@ public class ScaleResetter : EditorWindow
     private Transform root;
     private int resetCount;
 
-    [MenuItem("Tools/VRChatTools/Scale Resetter")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         GetWindow<ScaleResetter>("Scale Resetter");
     }

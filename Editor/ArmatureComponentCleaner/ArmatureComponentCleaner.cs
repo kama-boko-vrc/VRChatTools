@@ -10,8 +10,7 @@ public class ArmatureComponentCleaner : EditorWindow
     private Transform root;
     private int removedCount;
 
-    [MenuItem("Tools/VRChatTools/Armature Component Cleaner")]
-    private static void ShowWindow()
+    internal static void ShowWindow()
     {
         GetWindow<ArmatureComponentCleaner>("Armature Component Cleaner");
     }
