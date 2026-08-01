@@ -173,7 +173,10 @@ internal static class QuickPrefabPlacerMenuInitializer
 {
     static QuickPrefabPlacerMenuInitializer()
     {
-        QuickPrefabPlacer.RebuildMenu();
+        // 起動直後・ドメインリロード直後はUnity側のメニュー構築がまだ済んでおらず、
+        // ここでAddMenuItemを呼んでも登録が定着しないことがあるため、
+        // delayCallで1フレーム遅らせてから登録する。
+        EditorApplication.delayCall += QuickPrefabPlacer.RebuildMenu;
     }
 }
 #endif
