@@ -54,40 +54,28 @@ jobs:
             --notes "VRChatTools ${{ steps.version.outputs.version }}" \
             --repo "${{ github.repository }}"
 
-      - name: Build index.json
+      - name: Build version entry
         id: index
         run: |
           set -euo pipefail
           REPO="${{ github.repository }}"
-          PKG_NAME="${{ steps.pkg.outputs.name }}"
           TAG="${{ steps.version.outputs.tag }}"
-          VERSION="${{ steps.version.outputs.version }}"
           ZIP_NAME="${{ steps.zip.outputs.zip_name }}"
           WORK_DIR="$(mktemp -d)"
 
           SHA=$(awk '{print $1}' "$ZIP_NAME.sha256")
 
-          ENTRY=$(jq --arg url "https://github.com/$REPO/releases/download/$TAG/$ZIP_NAME" --arg sha "$SHA" \
-            '. + {url: $url, zipSHA256: $sha}' package.json)
+          jq --arg url "https://github.com/$REPO/releases/download/$TAG/$ZIP_NAME" --arg sha "$SHA" \
+            '. + {url: $url, zipSHA256: $sha}' package.json > "$WORK_DIR/entry.json"
 
-          # 過去バージョンの情報は保持せず、常に最新バージョンのみを掲載する。
-          jq -n \
-            --arg name "VRChatTools" \
-            --arg id "com.kama-boko-vrc.vrchat-tools-repo" \
-            --arg author "kama-boko-vrc" \
-            --arg url "https://kama-boko-vrc.github.io/VRChatTools/index.json" \
-            --arg pkgName "$PKG_NAME" \
-            --arg version "$VERSION" \
-            --argjson entry "$ENTRY" \
-            '{name: $name, id: $id, author: $author, url: $url, packages: {($pkgName): {versions: {($version): $entry}}}}' \
-            > "$WORK_DIR/index.json"
-
-          echo "index_path=$WORK_DIR/index.json" >> "$GITHUB_OUTPUT"
+          echo "entry_path=$WORK_DIR/entry.json" >> "$GITHUB_OUTPUT"
 
       - name: Publish index.json to GitHub Pages
         run: |
           set -euo pipefail
-          INDEX_PATH="${{ steps.index.outputs.index_path }}"
+          ENTRY_PATH="${{ steps.index.outputs.entry_path }}"
+          PKG_NAME="${{ steps.pkg.outputs.name }}"
+          VERSION="${{ steps.version.outputs.version }}"
           WORKTREE="$(mktemp -d)"
 
           git config user.name "github-actions[bot]"
@@ -102,7 +90,23 @@ jobs:
             git -C "$WORKTREE" rm -rf . > /dev/null 2>&1 || true
           fi
 
-          cp "$INDEX_PATH" "$WORKTREE/index.json"
+          # 既存のindex.jsonに新バージョンをマージし、過去バージョンの情報を保持する
+          # （VCC/ALCOM側で過去バージョンを選択インストールできるようにするため）。
+          if [ ! -f "$WORKTREE/index.json" ]; then
+            jq -n \
+              --arg name "VRChatTools" \
+              --arg id "com.kama-boko-vrc.vrchat-tools-repo" \
+              --arg author "kama-boko-vrc" \
+              --arg url "https://kama-boko-vrc.github.io/VRChatTools/index.json" \
+              '{name: $name, id: $id, author: $author, url: $url, packages: {}}' \
+              > "$WORKTREE/index.json"
+          fi
+
+          jq --arg pkgName "$PKG_NAME" --arg version "$VERSION" --slurpfile entryArr "$ENTRY_PATH" \
+            '.packages[$pkgName].versions[$version] = $entryArr[0]' \
+            "$WORKTREE/index.json" > "$WORKTREE/index.json.tmp"
+          mv "$WORKTREE/index.json.tmp" "$WORKTREE/index.json"
+
           git -C "$WORKTREE" add index.json
           git -C "$WORKTREE" commit -m "Update index.json for ${{ steps.version.outputs.tag }}" || echo "No changes to commit"
           git -C "$WORKTREE" push origin gh-pages
