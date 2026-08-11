@@ -56,6 +56,16 @@ VCC/ALCOMを使わない場合は、各ツールの `.cs` ファイルを直接U
 2. 「対象」にリセットしたい階層のルートTransformをドラッグ&ドロップ
 3. 「スケールを1.0にリセット」を押すと、対象とその配下すべてのTransformの `localScale` が `(1,1,1)` にリセットされます
 
+## BlendShapeResetter
+
+指定したTransformとその配下すべてのSkinnedMeshRendererについて、全BlendShapeのWeightを0にリセットするエディタ拡張です。
+
+### 使い方
+
+1. メニューから `Tools > VRChatTools` を開き、一覧から「Blend Shape Resetter」を選んで開く
+2. 「対象」にリセットしたい階層のルートTransformをドラッグ&ドロップ
+3. 「BlendShapeを0にリセット」を押すと、対象とその配下すべてのSkinnedMeshRendererのBlendShape Weightが0にリセットされます（Undo対応、Ctrl+Zで復元可）
+
 ## ArmatureComponentCleaner
 
 指定したTransformとその配下すべてから、Transform以外の全コンポーネントを再帰的に削除するエディタ拡張です。
