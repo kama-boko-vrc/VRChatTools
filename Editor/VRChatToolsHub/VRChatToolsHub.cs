@@ -37,6 +37,11 @@ public class VRChatToolsHub : EditorWindow
             ScaleResetter.ShowWindow,
             "指定したTransformとその配下すべてのlocalScaleを(1, 1, 1)にリセットします。"),
         new ToolInfo(
+            "Blend Shape Resetter",
+            BlendShapeResetter.ShowWindow,
+            "指定したTransformとその配下すべてのSkinnedMeshRendererについて、\n" +
+            "全BlendShapeのWeightを0にリセットします。"),
+        new ToolInfo(
             "Armature Component Cleaner",
             ArmatureComponentCleaner.ShowWindow,
             "指定したTransformとその配下すべてから、Transform以外の全コンポーネントを再帰的に削除します。"),
