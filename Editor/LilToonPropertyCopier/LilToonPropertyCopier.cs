@@ -16,6 +16,9 @@ public class LilToonPropertyCopier : EditorWindow
     private readonly Dictionary<string, bool> selectedProperties = new Dictionary<string, bool>();
     private Vector2 scroll;
 
+    private Transform avatarRoot;
+    private readonly List<Material> avatarMaterials = new List<Material>();
+
     internal static void ShowWindow()
     {
         LilToonPropertyCopier window = GetWindow<LilToonPropertyCopier>("LilToon Property Copier");
@@ -25,35 +28,53 @@ public class LilToonPropertyCopier : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.HelpBox(
-            "コピー元マテリアルの選択したプロパティのみを、コピー先の複数マテリアルへ一括コピーします。\n" +
+            "アバターを指定すると、使用中のマテリアル一覧が表示されます。\n" +
+            "「元」（コピー元、1つだけ）「先」（コピー先、複数可）にチェックしてください。\n" +
             "コピー元・コピー先は同じシェーダーである必要があります。",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.LabelField("コピー元");
-        sourceMaterial = (Material)EditorGUILayout.ObjectField(sourceMaterial, typeof(Material), false);
+        EditorGUILayout.LabelField("アバター");
+        avatarRoot = (Transform)EditorGUILayout.ObjectField(avatarRoot, typeof(Transform), true);
         if (EditorGUI.EndChangeCheck())
         {
-            RefreshProperties();
+            ScanAvatarMaterials();
         }
 
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("コピー先", EditorStyles.boldLabel);
-        for (int i = 0; i < targetMaterials.Count; i++)
+        if (avatarRoot != null)
         {
-            EditorGUILayout.BeginHorizontal();
-            targetMaterials[i] = (Material)EditorGUILayout.ObjectField(targetMaterials[i], typeof(Material), false);
-            if (GUILayout.Button("-", GUILayout.Width(20)))
+            EditorGUILayout.Space();
+
+            if (avatarMaterials.Count == 0)
             {
-                targetMaterials.RemoveAt(i);
-                EditorGUILayout.EndHorizontal();
-                break;
+                EditorGUILayout.HelpBox("使用しているマテリアルが見つかりませんでした。", MessageType.Info);
             }
-            EditorGUILayout.EndHorizontal();
-        }
-        if (GUILayout.Button("+ コピー先を追加"))
-        {
-            targetMaterials.Add(null);
+            else
+            {
+                foreach (Material mat in avatarMaterials)
+                {
+                    EditorGUILayout.BeginHorizontal();
+
+                    bool isSource = mat == sourceMaterial;
+                    bool newIsSource = EditorGUILayout.ToggleLeft("元", isSource, GUILayout.Width(35));
+                    if (newIsSource != isSource)
+                    {
+                        sourceMaterial = newIsSource ? mat : null;
+                        RefreshProperties();
+                    }
+
+                    bool isTarget = targetMaterials.Contains(mat);
+                    bool newIsTarget = EditorGUILayout.ToggleLeft("先", isTarget, GUILayout.Width(35));
+                    if (newIsTarget && !isTarget) targetMaterials.Add(mat);
+                    else if (!newIsTarget && isTarget) targetMaterials.Remove(mat);
+
+                    EditorGUI.BeginDisabledGroup(true);
+                    EditorGUILayout.ObjectField(mat, typeof(Material), false);
+                    EditorGUI.EndDisabledGroup();
+
+                    EditorGUILayout.EndHorizontal();
+                }
+            }
         }
 
         if (sourceMaterial == null) return;
@@ -98,6 +119,21 @@ public class LilToonPropertyCopier : EditorWindow
     private void RefreshProperties()
     {
         selectedProperties.Clear();
+    }
+
+    private void ScanAvatarMaterials()
+    {
+        avatarMaterials.Clear();
+        if (avatarRoot == null) return;
+
+        HashSet<Material> seen = new HashSet<Material>();
+        foreach (Renderer renderer in avatarRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            foreach (Material mat in renderer.sharedMaterials)
+            {
+                if (mat != null && seen.Add(mat)) avatarMaterials.Add(mat);
+            }
+        }
     }
 
     private void SetAllSelected(bool value)
