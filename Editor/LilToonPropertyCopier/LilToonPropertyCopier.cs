@@ -28,40 +28,10 @@ public class LilToonPropertyCopier : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.HelpBox(
-            "コピー元マテリアルの選択したプロパティのみを、コピー先の複数マテリアルへ一括コピーします。\n" +
-            "コピー元・コピー先は同じシェーダーである必要があります。\n" +
-            "アバターを指定すると、使用中のマテリアル一覧からチェックボックスで選択できます。",
+            "アバターを指定すると、使用中のマテリアル一覧が表示されます。\n" +
+            "「元」（コピー元、1つだけ）「先」（コピー先、複数可）にチェックしてください。\n" +
+            "コピー元・コピー先は同じシェーダーである必要があります。",
             MessageType.Info);
-
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.LabelField("コピー元");
-        sourceMaterial = (Material)EditorGUILayout.ObjectField(sourceMaterial, typeof(Material), false);
-        if (EditorGUI.EndChangeCheck())
-        {
-            RefreshProperties();
-        }
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("コピー先", EditorStyles.boldLabel);
-        for (int i = 0; i < targetMaterials.Count; i++)
-        {
-            EditorGUILayout.BeginHorizontal();
-            targetMaterials[i] = (Material)EditorGUILayout.ObjectField(targetMaterials[i], typeof(Material), false);
-            if (GUILayout.Button("-", GUILayout.Width(20)))
-            {
-                targetMaterials.RemoveAt(i);
-                EditorGUILayout.EndHorizontal();
-                break;
-            }
-            EditorGUILayout.EndHorizontal();
-        }
-        if (GUILayout.Button("+ コピー先を追加"))
-        {
-            targetMaterials.Add(null);
-        }
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("アバターから選択（任意）", EditorStyles.boldLabel);
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.LabelField("アバター");
@@ -73,14 +43,14 @@ public class LilToonPropertyCopier : EditorWindow
 
         if (avatarRoot != null)
         {
+            EditorGUILayout.Space();
+
             if (avatarMaterials.Count == 0)
             {
                 EditorGUILayout.HelpBox("使用しているマテリアルが見つかりませんでした。", MessageType.Info);
             }
             else
             {
-                EditorGUILayout.LabelField("「元」「先」にチェックすると、上のコピー元・コピー先に反映されます", EditorStyles.miniLabel);
-
                 foreach (Material mat in avatarMaterials)
                 {
                     EditorGUILayout.BeginHorizontal();
