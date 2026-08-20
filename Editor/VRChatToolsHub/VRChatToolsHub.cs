@@ -63,6 +63,11 @@ public class VRChatToolsHub : EditorWindow
             "Quick Prefab Placer",
             QuickPrefabPlacer.ShowWindow,
             "登録した複数のプレハブを、ヒエラルキーの右クリックメニューから選んでワンクリック配置します。"),
+        new ToolInfo(
+            "Texture Compression Batch Setter",
+            TextureCompressionBatchSetter.ShowWindow,
+            "アバターが使う全テクスチャの圧縮設定を一括変更します。\n" +
+            "解像度は各テクスチャの元画像の解像度に応じて自動決定されます。"),
     };
 
     private int selectedIndex;
