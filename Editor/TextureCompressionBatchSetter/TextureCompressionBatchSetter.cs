@@ -6,20 +6,13 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// アバターのルートを指定するだけで、配下のRenderer/SkinnedMeshRendererが使う
-/// 全マテリアルのテクスチャプロパティを集め、テクスチャ圧縮設定を一括変更するエディタ拡張。
-/// 解像度（Max Size）は各テクスチャの元画像の解像度に応じて自動決定される
-/// （元画像と同じ解像度、それがUnityの選択肢にない場合は長辺を超える最も近い選択肢）。
+/// 全マテリアルのテクスチャプロパティを集め、圧縮品質を一括で高品質（CompressedHQ）に
+/// 変更するエディタ拡張。解像度（Max Size）など他のインポート設定には触れない。
 /// </summary>
 public class TextureCompressionBatchSetter : EditorWindow
 {
-    private static readonly int[] AllowedMaxSizes = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
-
     private Transform avatarRoot;
     private readonly List<Texture2D> textures = new List<Texture2D>();
-
-    private TextureImporterCompression compression = TextureImporterCompression.Compressed;
-    private bool useCrunchCompression;
-    private int compressorQuality = 50;
 
     internal static void ShowWindow()
     {
@@ -30,9 +23,8 @@ public class TextureCompressionBatchSetter : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.HelpBox(
-            "アバターが使用する全テクスチャの圧縮設定を一括変更します。\n" +
-            "解像度（Max Size）は各テクスチャの元画像の解像度に応じて自動決定されます\n" +
-            "（元画像と同じ解像度、選択肢にない場合は長辺を超える最も近い選択肢）。\n" +
+            "アバターが使用する全テクスチャの圧縮品質を、一括で高品質（High Quality）に変更します。\n" +
+            "解像度（Max Size）など他のインポート設定は変更しません。\n" +
             "インポート設定への変更のためCtrl+Zで元に戻せません。事前にバックアップを推奨します。",
             MessageType.Warning);
 
@@ -62,13 +54,7 @@ public class TextureCompressionBatchSetter : EditorWindow
         }
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("圧縮設定", EditorStyles.boldLabel);
-        compression = (TextureImporterCompression)EditorGUILayout.EnumPopup("Compression", compression);
-        useCrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", useCrunchCompression);
-        compressorQuality = EditorGUILayout.IntSlider("Compressor Quality", compressorQuality, 0, 100);
-
-        EditorGUILayout.Space();
-        if (GUILayout.Button("設定を一括適用"))
+        if (GUILayout.Button("圧縮品質を高品質に変更"))
         {
             Execute();
         }
@@ -107,10 +93,7 @@ public class TextureCompressionBatchSetter : EditorWindow
         TextureImporter importer = GetImporter(tex);
         if (importer == null) return $"{tex.name}（インポーター取得不可、スキップされます）";
 
-        importer.GetSourceTextureWidthAndHeight(out int srcWidth, out int srcHeight);
-        int targetMaxSize = ResolveMaxTextureSize(Mathf.Max(srcWidth, srcHeight));
-
-        return $"{tex.name}　元画像 {srcWidth}x{srcHeight} → Max Size {targetMaxSize}（現在 {importer.maxTextureSize}）";
+        return $"{tex.name}　現在の圧縮品質: {importer.textureCompression}";
     }
 
     private static TextureImporter GetImporter(Texture2D tex)
@@ -119,16 +102,6 @@ public class TextureCompressionBatchSetter : EditorWindow
         if (string.IsNullOrEmpty(path)) return null;
 
         return AssetImporter.GetAtPath(path) as TextureImporter;
-    }
-
-    private static int ResolveMaxTextureSize(int longEdge)
-    {
-        foreach (int size in AllowedMaxSizes)
-        {
-            if (size >= longEdge) return size;
-        }
-
-        return AllowedMaxSizes[AllowedMaxSizes.Length - 1];
     }
 
     private void Execute()
@@ -140,18 +113,13 @@ public class TextureCompressionBatchSetter : EditorWindow
             TextureImporter importer = GetImporter(tex);
             if (importer == null) continue;
 
-            importer.GetSourceTextureWidthAndHeight(out int srcWidth, out int srcHeight);
-
-            importer.maxTextureSize = ResolveMaxTextureSize(Mathf.Max(srcWidth, srcHeight));
-            importer.textureCompression = compression;
-            importer.crunchedCompression = useCrunchCompression;
-            importer.compressionQuality = compressorQuality;
+            importer.textureCompression = TextureImporterCompression.CompressedHQ;
 
             importer.SaveAndReimport();
             changedCount++;
         }
 
-        Debug.Log($"[TextureCompressionBatchSetter] 完了: {changedCount}件のテクスチャの圧縮設定を変更しました");
+        Debug.Log($"[TextureCompressionBatchSetter] 完了: {changedCount}件のテクスチャの圧縮品質を高品質に変更しました");
     }
 }
 #endif
