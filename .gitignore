@@ -1,0 +1,19 @@
+# Claude Code: リポジトリにコミットしない（ローカル専用）
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# 機密情報
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
